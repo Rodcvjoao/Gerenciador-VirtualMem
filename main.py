@@ -1,5 +1,4 @@
-import paginas
-from processos import Processo
+from classesProcessos import *
 
 # "With" é uma palavra reservada que garante o gerenciamento de recursos,
 # abrindo e fechando o arquivo de uma vez só
@@ -29,7 +28,7 @@ for com in seqComandos:
                 case "GB":
                     tamProcesso *= 2**30
         except IndexError:
-            #Evitar erro no eventual caso de não passar unidade de tamanho
+            # Evitar erro no eventual caso de não passar unidade de tamanho
             pass
         processosLista.append(Processo(idProcesso, tamProcesso))
 
