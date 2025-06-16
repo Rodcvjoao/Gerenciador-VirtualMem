@@ -1,4 +1,5 @@
 from classesProcessos import *
+from memoriaPrincipal import *
 
 # "With" é uma palavra reservada que garante o gerenciamento de recursos,
 # abrindo e fechando o arquivo de uma vez só
@@ -13,8 +14,12 @@ with open("caso_de_teste.txt", "r", encoding="utf-8") as f:
     seqComandos = f.read()
     seqComandos = [tuple(c.split(" ")) for c in seqComandos.split("\n")]
 
+mp = MemoriaPrincipal(TAM_MEMORIA)
+
 processosLista = []
 for com in seqComandos:
+    # TODO: Conforme o código crescer e tomar forma, adicionemos novos casos
+    # (possivelmente tornar esse if em um switch case com as instruções possíveis)
     if com[1] == "C":
         idProcesso = int(com[0][1])
         tamProcesso = int(com[2])
