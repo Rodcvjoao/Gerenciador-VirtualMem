@@ -9,6 +9,14 @@ from config import TAMANHO_PAGINA
 class Processo:
     def __init__(self, id, tamanho):
         self.id = id
+        # Possíveis estados:
+        #   N = Novo
+        #   E = Executando
+        #   F = Finalizado
+        #   P = Pronto
+        #   B = Bloqueado
+        #   PS = Pronto-Suspenso
+        #   BS = Bloqueado-Suspenso
         self.estado = "N"
         self.tamanho = tamanho
         # Queremos sempre arredondar o número de páginas para cima
@@ -45,14 +53,13 @@ class TabelaPaginas:
         if numeroPaginaVirtual >= self.quantidadeEntradas:
             raise ValueError(f"VPN {numeroPaginaVirtual} fora dos limites da tabela de páginas")
         
-        # Se a TLB estiver disponível, tenta usar ela primeiro
-        if tlb is not None:
-            numeroFrameFisico = tlb.buscar(self.entradas[numeroPaginaVirtual].idProcesso, numeroPaginaVirtual)
-            if numeroFrameFisico is not None:
-                # TLB hit - retorna o endereço físico
-                return (numeroFrameFisico * TAMANHO_PAGINA + offset, False)
-        
-        # TLB miss ou não disponível - consulta a tabela de páginas
+        # Se a TLB estiver disponível, tenta usar ela primeiro        
+        numeroFrameFisico = tlb.buscar(self.idProcesso, numeroPaginaVirtual)
+        if numeroFrameFisico is not None:
+            # TLB hit - retorna o endereço físico
+            return (numeroFrameFisico * TAMANHO_PAGINA + offset, False)
+
+        # TLB miss - consulta a tabela de páginas
         entrada = self.entradas[numeroPaginaVirtual]
         if not entrada.bitPresenca:
             # Page fault - página não está na memória
@@ -61,9 +68,8 @@ class TabelaPaginas:
         # Página encontrada na tabela de páginas
         numeroFrameFisico = entrada.enderecoMemoriaPrincipal
         
-        # Se a TLB estiver disponível, atualiza ela
-        if tlb is not None:
-            tlb.inserir(entrada.idProcesso, numeroPaginaVirtual, numeroFrameFisico)
+        # Atualiza TLB ou insere nova entrada
+        tlb.inserir(entrada.idProcesso, numeroPaginaVirtual, numeroFrameFisico)
         
         # Retorna o endereço físico
         return (numeroFrameFisico * TAMANHO_PAGINA + offset, False)
@@ -73,7 +79,6 @@ class EntradaTP:
         self.bitPresenca = False  # Indica se a página está na memória física
         self.bitModificacao = False  # Indica se a página foi modificada
         self.enderecoMemoriaPrincipal = None  # Número do frame físico (PFN)
-        self.idProcesso = None  # ID do processo dono da página
 
 class Pagina:
     def __init__(self, idProcesso, numeroPaginaVirtual):
