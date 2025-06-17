@@ -1,5 +1,5 @@
 import math
-from config import TAM_PAGINA
+from config import TAMANHO_PAGINA
 
 # TODO: Definir uma forma de escolher o tamanho da página 
 # (O ideal é que possa ser facilmente trocada a cada execução) (Passar como input?)
@@ -13,72 +13,72 @@ class Processo:
         self.tamanho = tamanho
         # Queremos sempre arredondar o número de páginas para cima
         # no comum caso de um valor não divisível de páginas
-        self.qtdPaginas = math.ceil(self.tamanho/TAM_PAGINA)
-        self.tabelaPagina = TabelaPagina(self.qtdPaginas)
+        self.quantidadePaginas = math.ceil(self.tamanho/TAMANHO_PAGINA)
+        self.tabelaPaginas = TabelaPaginas(self.quantidadePaginas)
 
 
 # TODO: Pensar estrutura da tabela de paginas
 
-class TabelaPagina:
-    def __init__(self, qtdPaginas):
-        self.qtdEntradas = qtdPaginas
-        self.entradas = [EntradaTP() for i in range(self.qtdEntradas)]
+class TabelaPaginas:
+    def __init__(self, quantidadePaginas):
+        self.quantidadeEntradas = quantidadePaginas
+        self.entradas = [EntradaTP() for i in range(self.quantidadeEntradas)]
     
-    def traduzir_endereco(self, endereco_virtual, tlb=None):
+    def traduzirEndereco(self, enderecoVirtual, tlb=None):
         """
         Traduz um endereço virtual para físico usando a TLB (se disponível) e a tabela de páginas.
         
         Args:
-            endereco_virtual: Endereço virtual a ser traduzido
+            enderecoVirtual: Endereço virtual a ser traduzido
             tlb: Instância da TLB (opcional)
             
         Returns:
-            tuple: (endereco_fisico, page_fault) onde:
-                - endereco_fisico é o endereço físico traduzido
+            tuple: (enderecoFisico, page_fault) onde:
+                - enderecoFisico é o endereço físico traduzido
                 - page_fault é True se ocorreu page fault, False caso contrário
         """
         # Calcula o número da página virtual e o offset
-        vpn = endereco_virtual // TAM_PAGINA
-        offset = endereco_virtual % TAM_PAGINA
+        numeroPaginaVirtual = enderecoVirtual // TAMANHO_PAGINA
+        offset = enderecoVirtual % TAMANHO_PAGINA
         
         # Verifica se o VPN é válido
-        if vpn >= self.qtdEntradas:
-            raise ValueError(f"VPN {vpn} fora dos limites da tabela de páginas")
+        if numeroPaginaVirtual >= self.quantidadeEntradas:
+            raise ValueError(f"VPN {numeroPaginaVirtual} fora dos limites da tabela de páginas")
         
         # Se a TLB estiver disponível, tenta usar ela primeiro
         if tlb is not None:
-            pfn = tlb.lookup(self.entradas[vpn].pid, vpn)
-            if pfn is not None:
+            numeroFrameFisico = tlb.buscar(self.entradas[numeroPaginaVirtual].idProcesso, numeroPaginaVirtual)
+            if numeroFrameFisico is not None:
                 # TLB hit - retorna o endereço físico
-                return (pfn * TAM_PAGINA + offset, False)
+                return (numeroFrameFisico * TAMANHO_PAGINA + offset, False)
         
         # TLB miss ou não disponível - consulta a tabela de páginas
-        entrada = self.entradas[vpn]
+        entrada = self.entradas[numeroPaginaVirtual]
         if not entrada.bitPresenca:
             # Page fault - página não está na memória
             return (None, True)
         
         # Página encontrada na tabela de páginas
-        pfn = entrada.enderecoMP
+        numeroFrameFisico = entrada.enderecoMemoriaPrincipal
         
         # Se a TLB estiver disponível, atualiza ela
         if tlb is not None:
-            tlb.insert(entrada.pid, vpn, pfn)
+            tlb.inserir(entrada.idProcesso, numeroPaginaVirtual, numeroFrameFisico)
         
         # Retorna o endereço físico
-        return (pfn * TAM_PAGINA + offset, False)
+        return (numeroFrameFisico * TAMANHO_PAGINA + offset, False)
 
 class EntradaTP:
     def __init__(self):
         self.bitPresenca = False  # Indica se a página está na memória física
         self.bitModificacao = False  # Indica se a página foi modificada
-        self.enderecoMP = None  # Número do frame físico (PFN)
-        self.pid = None  # ID do processo dono da página
+        self.enderecoMemoriaPrincipal = None  # Número do frame físico (PFN)
+        self.idProcesso = None  # ID do processo dono da página
 
 class Pagina:
-    def __init__(self, pid, vpn):
-        self.pid = pid
-        self.vpn = vpn
-        self.dados = bytearray(TAM_PAGINA)  # Dados da página
+    def __init__(self, idProcesso, numeroPaginaVirtual):
+        self.idProcesso = idProcesso
+        self.numeroPaginaVirtual = numeroPaginaVirtual
+        self.dados = bytearray(TAMANHO_PAGINA)  # Dados da página
         self.referenciada = False  # Bit de referência para algoritmos de substituição
         self.modificada = False  # Bit de modificação

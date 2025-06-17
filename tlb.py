@@ -1,78 +1,71 @@
 from collections import OrderedDict
-from config import TAM_TLB
+from config import TAMANHO_TLB
 
-class TLBEntry:
-    def __init__(self, vpn, pfn, pid):
-        self.vpn = vpn  # Número da Página Virtual
-        self.pfn = pfn  # Número do Frame Físico
-        self.pid = pid  # ID do Processo
-        self.valid = True
+class EntradaTLB:
+    def __init__(self, numeroPaginaVirtual, numeroFrameFisico, idProcesso):
+        self.numeroPaginaVirtual = numeroPaginaVirtual  # Número da Página Virtual
+        self.numeroFrameFisico = numeroFrameFisico  # Número do Frame Físico
+        self.idProcesso = idProcesso  # ID do Processo
+        self.valido = True
 
 class TLB:
-    def __init__(self, size=None):
+    def __init__(self, tamanho=None):
         # Usa o tamanho do arquivo de configuração se não for especificado
-        self.size = size if size is not None else TAM_TLB
+        self.tamanho = tamanho if tamanho is not None else TAMANHO_TLB
         # Usando OrderedDict para implementar a política de substituição LRU
-        # O parâmetro size determina quantas entradas a TLB pode armazenar
-        self.entries = OrderedDict()  # Chave: (pid, vpn), Valor: TLBEntry
-        self.hits = 0
-        self.misses = 0
+        # O parâmetro tamanho determina quantas entradas a TLB pode armazenar
+        self.entradas = OrderedDict()  # Chave: (idProcesso, numeroPaginaVirtual), Valor: EntradaTLB
+        self.acertos = 0
+        self.falhas = 0
 
-    def lookup(self, pid, vpn):
+    def buscar(self, idProcesso, numeroPaginaVirtual):
         """
         Procura um número de página virtual na TLB.
         Retorna o número do frame físico se encontrado, None caso contrário.
         """
-        key = (pid, vpn)
-        if key in self.entries:
+        chave = (idProcesso, numeroPaginaVirtual)
+        if chave in self.entradas:
             # Move a entrada para o final (mais recentemente usada)
-            entry = self.entries.pop(key)
-            self.entries[key] = entry
-            self.hits += 1
-            return entry.pfn
-        self.misses += 1
+            entrada = self.entradas.pop(chave)
+            self.entradas[chave] = entrada
+            self.acertos += 1
+            return entrada.numeroFrameFisico
+        self.falhas += 1
         return None
 
-    def insert(self, pid, vpn, pfn):
+    def inserir(self, idProcesso, numeroPaginaVirtual, numeroFrameFisico):
         """
         Insere uma nova tradução na TLB.
         Se a TLB estiver cheia, a entrada menos recentemente usada é removida.
         """
-        key = (pid, vpn)
+        chave = (idProcesso, numeroPaginaVirtual)
         # Se a entrada já existe, atualiza ela
-        if key in self.entries:
-            self.entries.pop(key)
+        if chave in self.entradas:
+            self.entradas.pop(chave)
         
         # Se a TLB estiver cheia, remove a entrada menos recentemente usada
-        if len(self.entries) >= self.size:
-            self.entries.popitem(last=False)  # Remove o primeiro item (mais antigo)
+        if len(self.entradas) >= self.tamanho:
+            self.entradas.popitem(last=False)  # Remove o primeiro item (mais antigo)
         
         # Adiciona a nova entrada
-        self.entries[key] = TLBEntry(vpn, pfn, pid)
+        self.entradas[chave] = EntradaTLB(numeroPaginaVirtual, numeroFrameFisico, idProcesso)
 
-    def invalidate(self, pid=None):
+    def invalidar(self):
         """
         Invalida entradas da TLB.
-        Se pid for fornecido, invalida apenas as entradas daquele processo.
-        Caso contrário, invalida todas as entradas.
         """
-        if pid is None:
-            self.entries.clear()
-        else:
-            # Remove todas as entradas do processo especificado
-            keys_to_remove = [key for key in self.entries.keys() if key[0] == pid]
-            for key in keys_to_remove:
-                del self.entries[key]
+        self.entradas.clear()
+        
 
-    def get_stats(self):
+    def obterEstatisticas(self):
         """
-        Retorna estatísticas de hits e misses da TLB.
+        Retorna estatísticas de acertos e falhas da TLB.
         """
-        total = self.hits + self.misses
-        hit_rate = (self.hits / total * 100) if total > 0 else 0
+        total = self.acertos + self.falhas
+        taxaAcertos = (self.acertos / total * 100) if total > 0 else 0
         return {
-            'hits': self.hits,
-            'misses': self.misses,
+            'acertos': self.acertos,
+            'falhas': self.falhas,
             'total': total,
-            'hit_rate': hit_rate
+            'taxaAcertos': taxaAcertos
         }
