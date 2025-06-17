@@ -32,6 +32,8 @@ for com in seqComandos:
                     tamProcesso *= 2**20
                 case "GB":
                     tamProcesso *= 2**30
+                case _:
+                    pass
         except IndexError:
             # Evitar erro no eventual caso de não passar unidade de tamanho
             pass

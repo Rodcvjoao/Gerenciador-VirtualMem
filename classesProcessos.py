@@ -14,7 +14,7 @@ class Processo:
         # Queremos sempre arredondar o número de páginas para cima
         # no comum caso de um valor não divisível de páginas
         self.qtdPaginas = math.ceil(self.tamanho/TAM_PAGINA)
-
+        self.tabelaPagina = TabelaPagina(self.qtdPaginas)
 
 # TODO: Pensar estrutura da tabela de paginas
 
@@ -28,7 +28,9 @@ class EntradaTP:
         self.bitPresenca = False
         self.bitModificacao = False
         self.enderecoMP = None
+        self.pagina = Pagina()
 
 
 class Pagina:
-    pass
+    def __init__(self):
+        self.conteudo = None
