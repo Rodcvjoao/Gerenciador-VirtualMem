@@ -173,5 +173,6 @@ class Tela_Configurar(t.Frame):
             fg="white",
             bg="#1ECC6F",
             font=("monospace", 10, "bold"),
-            command=lambda: self.controller.show_page("ui_pagina_input.py") 
+            command=lambda: self.controller.show_page("ui_pagina_input.py"),
+            activebackground="#696969"
         ).place(x= 500, y= 300)
