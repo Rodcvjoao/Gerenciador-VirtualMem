@@ -14,7 +14,7 @@ with open("caso_de_teste.txt", "r", encoding="utf-8") as f:
     seqComandos = f.read()
     seqComandos = [tuple(c.split(" ")) for c in seqComandos.split("\n")]
 
-mp = MemoriaPrincipal(TAM_MEMORIA)
+mp = MemoriaPrincipal(TAMANHO_MEMORIA)
 
 processosLista = []
 for com in seqComandos:

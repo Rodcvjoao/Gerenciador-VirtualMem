@@ -1,4 +1,4 @@
-from config import TAMANHO_MEMORIA, TAMANHO_PAGINA, POLITICA_SUB
+from config import *
 
 '''
 IMPORTANTE:
@@ -60,9 +60,9 @@ class MemoriaPrincipal:
                 return
             
         match POLITICA_SUB:
-            case 0:
+            case PoliticaSub.LRU.value:
                 self.substituicaoLRU(pagina)
-            case 1:
+            case PoliticaSub.Relogio.value:
                 self.substituicaoRelogio(pagina)
         
     def substituicaoLRU(self, pagina):

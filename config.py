@@ -1,3 +1,5 @@
+from enum import Enum
+
 # Configurações do sistema de memória virtual
 # Estas configurações podem ser modificadas diretamente neste arquivo
 
@@ -14,6 +16,10 @@ TAMANHO_MEMORIA = 2**30
 # POLITICA_SUB = 0 -> LRU
 # POLITICA_SUB = 1 -> RELÓGIO DE UM BIT
 POLITICA_SUB = 0
+
+class PoliticaSub(Enum):
+    LRU = 0
+    Relogio = 1
 
 # Função para verificar se um número é potência de 2
 def ehPotenciaDeDois(n):
