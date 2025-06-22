@@ -22,15 +22,16 @@ class Processo:
         # Queremos sempre arredondar o número de páginas para cima
         # no comum caso de um valor não divisível de páginas
         self.quantidadePaginas = math.ceil(self.tamanho/TAMANHO_PAGINA)
-        self.tabelaPaginas = TabelaPaginas(self.quantidadePaginas)
+        self.tabelaPaginas = TabelaPaginas(self.quantidadePaginas, id)
 
 
 # TODO: Pensar estrutura da tabela de paginas
 
 class TabelaPaginas:
-    def __init__(self, quantidadePaginas):
+    def __init__(self, quantidadePaginas, idProcesso):
+        self.idProcesso = idProcesso
         self.quantidadeEntradas = quantidadePaginas
-        self.entradas = [EntradaTP() for i in range(self.quantidadeEntradas)]
+        self.entradas = [EntradaTP(idProcesso, i) for i in range(self.quantidadeEntradas)]
     
     def traduzirEndereco(self, enderecoVirtual, tlb=None):
         """
@@ -75,17 +76,25 @@ class TabelaPaginas:
         return (numeroFrameFisico * TAMANHO_PAGINA + offset, False)
 
 class EntradaTP:
-    def __init__(self):
+    def __init__(self, idProcesso, idEntrada):
         self.bitPresenca = False  # Indica se a página está na memória física
         self.bitModificacao = False  # Indica se a página foi modificada
         self.enderecoMemoriaPrincipal = None  # Número do frame físico (PFN)
-        self.pagina = Pagina()
+        self.idProcesso = idProcesso
+
+        # Ainda pensando se idEntrada pode ser utilizado em algum momento, deixar aqui...
+        self.idEntrada = idEntrada
+        
+        self.pagina = Pagina(idProcesso, idEntrada)
 
 
 class Pagina:
-    def __init__(self, idProcesso, numeroPaginaVirtual):
+    def __init__(self, idProcesso, idPagina):
         self.idProcesso = idProcesso
-        self.numeroPaginaVirtual = numeroPaginaVirtual
+
+        # Ainda pensando se idPagina pode ser utilizado em algum momento, deixar aqui...
+        self.idPagina = idPagina
+
         self.dados = bytearray(TAMANHO_PAGINA)  # Dados da página
         self.referenciada = False  # Bit de referência para algoritmos de substituição
         self.modificada = False  # Bit de modificação
