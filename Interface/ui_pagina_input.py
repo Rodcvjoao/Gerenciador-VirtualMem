@@ -22,7 +22,7 @@ class Tela_Input(t.Frame):
         # --- IMAGEM DE FUNDO FIXA QUE PREENCHE O FRAME ---
         self.background_image_tk = None 
         try:
-            imagem_fundo_pil = Image.open("Imagens/Página_Input_UI.png")
+            imagem_fundo_pil = Image.open("Interface/Imagens/Página_Input_UI.png")
             self.background_image_tk = ImageTk.PhotoImage(imagem_fundo_pil)
 
             # Criar um Label para exibir a imagem

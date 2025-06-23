@@ -4,6 +4,9 @@ from PIL import Image, ImageTk
 
 class Tela_Configurar(t.Frame): 
 
+    
+
+
     def __init__(self, parent_frame, controller):
 
         super().__init__(parent_frame, background='#181f30') 
@@ -20,7 +23,7 @@ class Tela_Configurar(t.Frame):
 
         self.background_image_tk = None 
         try:
-            imagem_fundo_pil = Image.open("Imagens/Página_Configurações_UI.png")
+            imagem_fundo_pil = Image.open("Interface/Imagens/Página_Configurações_UI.png")
             self.background_image_tk = ImageTk.PhotoImage(imagem_fundo_pil)
 
             self.label_background = t.Label(self, image=self.background_image_tk, bg='#181f30')
@@ -145,8 +148,6 @@ class Tela_Configurar(t.Frame):
         combobox_unidade_endlog.grid(column=3, row=6, sticky=(t.W, t.E), padx=10, pady=2)
 
 
-
-
         # Faz o espaçamento (após todos os widgets serem adicionados ao mainframe)
         for child in mainframe.winfo_children():
             child.grid_configure(padx=10, pady=6)
@@ -176,3 +177,14 @@ class Tela_Configurar(t.Frame):
             command=lambda: self.controller.show_page("ui_pagina_input.py"),
             activebackground="#696969"
         ).place(x= 500, y= 300)
+
+
+        #Pegar as informações
+        self.info_tam_memp = tam_mem_fis_entry.get()
+        self.info_tam_mems = tam_mem_sec_entry.get()
+        self.info_tam_pag = tam_pagina_entry.get()
+        self.info_tam_quadro = tam_quad_mem_entry.get()
+        self.info_tam_endlog = tam_end_log_entry.get()
+        self.info_num_lin_tlb = num_lin_tlb_entry.get()
+
+
