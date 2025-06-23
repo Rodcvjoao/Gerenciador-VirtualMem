@@ -80,8 +80,8 @@ def print_estado_sistema(mp, tlb, processos):
     # TODO: Implementar um método print_estado() na classe MemoriaPrincipal
     # mp.print_estado()
     
-    # TODO: Implementar um método print_estado() na classe TLB
-    # tlb.print_estado()
+
+    tlb.print_estado()
     
     print("\n--- Estado dos Processos e Tabelas de Páginas ---")
     for p in processos:
@@ -163,8 +163,8 @@ for comando in seqComandos:
             # TODO: Implementar a lógica de liberação de quadros na MemoriaPrincipal
             # mp.libera_processo(processo_atual)
             
-            # TODO: Implementar a invalidação de entradas específicas do processo na TLB
-            # tlb.invalidar_processo(processo_atual.id)
+            
+            tlb.invalidar()
             
     # Imprimir o estado do sistema ao final de cada ciclo
     print_estado_sistema(mp, tlb, processosLista)
