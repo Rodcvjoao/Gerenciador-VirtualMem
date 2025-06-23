@@ -69,3 +69,17 @@ class TLB:
             'total': total,
             'taxaAcertos': taxaAcertos
         }
+    
+
+    def print_estado(self):
+        print("\n--- Estado da TLB ---")
+        if not self.entradas:
+            print("  TLB está vazia.")
+        else:
+            print("  [ID Processo, VPN] -> PFN")
+            for (idProc, vpn), entrada in self.entradas.items():
+                print(f"  [{idProc}, {vpn}] -> {entrada.numeroFrameFisico}")
+        
+        # Imprime as estatísticas
+        stats = self.obterEstatisticas()
+        print(f"  Estatísticas: {stats['acertos']} acertos, {stats['falhas']} falhas | Taxa de Acerto: {stats['taxaAcertos']:.2f}%")
