@@ -7,9 +7,7 @@ from config import *
 # FUNÇÕES AUXILIARES 
 # ===================
 
-
-#alteração para uso melhor das classes - pietro
-def tratar_acesso_memoria(processo, endereco_virtual, tlb, mp, tipo_acesso):
+def tratar_acesso_memoria(processo, endereco_virtual, tlb, mp, tipo_acesso, processos_lista):
     """
     Orquestra a tradução de endereço, tratando acertos e falhas na TLB e na Tabela de Páginas.
     """
@@ -32,25 +30,24 @@ def tratar_acesso_memoria(processo, endereco_virtual, tlb, mp, tipo_acesso):
 
     else: # Ocorreu um Page Fault
         print(f"P{processo.id}: FALTA DE PÁGINA (Page Fault) para o endereço virtual {endereco_virtual}!")
-        processo.estado = "B" # Bloqueia o processo enquanto trata a falta
+        processo.estado = "B"
 
         numero_pagina_necessaria = endereco_virtual // TAMANHO_PAGINA
         entrada_tp_necessaria = processo.tabelaPaginas.entradas[numero_pagina_necessaria]
         pagina_necessaria = entrada_tp_necessaria.pagina
 
-        # 3. Informa a Memória Principal para carregar a página
-        # A MP irá encontrar um quadro livre ou substituir uma página e retornará o quadro usado.
-        quadro_alocado = mp.carregaPagina(processo, pagina_necessaria)
+        # A função agora retorna o quadro alocado e a página que foi substituída (se houver)
+        quadro_alocado, pagina_substituida = mp.carregaPagina(processo, pagina_necessaria)
 
-        # Antes de atualizar a nova entrada, invalida a entrada da página antiga (se houve substituição)
-        if quadro_alocado.pagina.idPagina != pagina_necessaria.idPagina: # Checa se a página no quadro é a que acabou de sair
-             pagina_antiga = quadro_alocado.pagina 
-             # IMPORTANTE: Esta lógica assume que a pagina antiga ainda está no quadro.
-             # O ideal é a função de substituição retornar a pagina antiga também.
-             # Para simplificar, vamos buscar o processo dono da pagina antiga e invalidar.
-             # (Esta parte pode ser melhorada dependendo da complexidade desejada)
-             pass # Lógica de invalidação da página antiga aqui...
-
+        # Se uma página foi de fato substituída, invalide sua antiga entrada na tabela de páginas
+        if pagina_substituida is not None:
+            # Encontra o processo dono da página substituída
+            processo_dono = next((p for p in processos_lista if p.id == pagina_substituida.idProcesso), None)
+            if processo_dono:
+                entrada_antiga = processo_dono.tabelaPaginas.entradas[pagina_substituida.idPagina]
+                entrada_antiga.bitPresenca = False
+                entrada_antiga.enderecoMemoriaPrincipal = None
+                print(f"Página {pagina_substituida.idPagina} do processo P{processo_dono.id} invalidada na Tabela de Páginas.")
 
         # 4. Atualiza a Tabela de Páginas do processo com o quadro alocado
         entrada_tp_necessaria.bitPresenca = True
@@ -167,7 +164,7 @@ for comando in seqComandos:
                 continue
             
             endereco_virtual = int(comando[2])
-            tratar_acesso_memoria(processo_atual, endereco_virtual, tlb, mp, tipoComando)
+            tratar_acesso_memoria(processo_atual, endereco_virtual, tlb, mp, tipoComando, processosLista)
 
         case "I":
             if not processo_atual:
