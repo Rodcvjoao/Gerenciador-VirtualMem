@@ -51,7 +51,7 @@ class Tela_Input(t.Frame):
             auxiliar_botao.columnconfigure(col, weight=0)
         
         for lin in range(5):
-            auxiliar_botao.rowconfigure(row, weight=0)
+            auxiliar_botao.rowconfigure(lin, weight=0)
 
         m = t.Frame(self)
         m.place(x= 210, y= 240)
