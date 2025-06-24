@@ -31,9 +31,7 @@ class TabelaPaginas:
     def __init__(self, quantidadePaginas, idProcesso):
         self.idProcesso = idProcesso
         self.quantidadeEntradas = quantidadePaginas
-        self.entradas = [EntradaTP(idProcesso, i) for i in range(self.quantidadeEntradas)]
-    
-    # NO ARQUIVO classesProcessos.py, DENTRO DA CLASSE TabelaPaginas
+    self.entradas = [EntradaTP(idProcesso, i) for i in range(self.quantidadeEntradas)]
 
     def traduzirEndereco(self, enderecoVirtual, tlb=None):
         """
