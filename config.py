@@ -13,6 +13,7 @@ NUM_LINHAS_TLB = "4"
 
 # Função para verificar se um número é potência de 2
 def ehPotenciaDeDois(n):
+    
     if n <= 0:
         return False
     return (n & (n - 1)) == 0

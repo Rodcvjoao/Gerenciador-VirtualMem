@@ -176,7 +176,7 @@ class Tela_Configurar(t.Frame):
 
 
     def salvar_configuracoes(self):
-        
+
         self.pegar_info()  # Chama o método que coleta e salva as informações
         self.controller.show_page("ui_pagina_input.py") # Navega para a próxima página
 
@@ -190,6 +190,7 @@ class Tela_Configurar(t.Frame):
         info_tam_quadro = self.tam_quad_mem_entry.get()
         info_tam_endlog = self.tam_end_log_entry.get()
         info_num_lin_tlb = self.num_lin_tlb_entry.get()
+
 
         # Lê o conteúdo atual
         try:
