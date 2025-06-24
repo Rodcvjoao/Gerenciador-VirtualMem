@@ -5,10 +5,38 @@
 # Vinda das informações da interface
 TAM_MEM_PRINCIPAL = "1024"
 TAM_MEM_SECUNDARIA = "1024"
-TAM_PAGINA = "4"
-TAM_QUADRO = "4"
-TAM_END_LOGICO = "4"
-NUM_LINHAS_TLB = "4"
+TAM_PAGINA = "1024"
+TAM_QUADRO = "216"
+TAM_END_LOGICO = "312"
+NUM_LINHAS_TLB = "14"
+
+# Tratamento das strings para inteiros
+TAMANHO_MEMORIA_P = int(TAM_MEM_PRINCIPAL)
+TAMANHO_MEMORIA_S = int(TAM_MEM_SECUNDARIA)
+TAMANHO_PAGINA = int(TAM_PAGINA)
+TAMANHO_QUADRO = int(TAM_QUADRO)
+TAMANHO_END_LOGICO = int(TAM_END_LOGICO)
+NUMERO_LINHAS_TLB = int(NUM_LINHAS_TLB)
+
+
+#Vinda da informação das unidades da interface - KB (2 ** 10), MB ( 2 ** 20 ) ou GB ( 2 ** 30 )
+UNID_MEMP = "MB - MegaBytes"
+UNID_MEMS = "KB - KiloBytes"
+UNID_PAG = "KB - KiloBytes"
+UNID_QUAD = "GB - GigaBytes"
+UNID_ENDLOG = "MB - MegaBytes"
+
+
+lista_unidade = [UNID_MEMP, UNID_MEMS, UNID_PAG, UNID_QUAD, UNID_ENDLOG]
+
+# Tratamento das unidades em strings para inteiros
+for i in range(len(lista_unidade)):
+    if (lista_unidade[i] == "KB - KiloBytes"):
+        lista_unidade[i] = 2 ** 10
+    elif (lista_unidade[i] == "MB - MegaBytes"):
+        lista_unidade[i] = 2 ** 20
+    else:
+        lista_unidade[i] = 2 ** 30
 
 
 # Função para verificar se um número é potência de 2
@@ -24,15 +52,15 @@ def validarConfiguracoes():
     Valida se as configurações estão em valores razoáveis.
     Retorna True se tudo estiver ok, False caso contrário.
     """
-    if int(NUM_LINHAS_TLB) <= 0:
+    if NUMERO_LINHAS_TLB <= 0:
         print("ERRO: TAMANHO_TLB deve ser maior que zero")
         return False
     
-    if int(TAM_PAGINA) <= 0 or not ehPotenciaDeDois(int(TAM_PAGINA)):  #Potência de 2
+    if TAMANHO_PAGINA <= 0 or not ehPotenciaDeDois(TAMANHO_PAGINA):  #Potência de 2
         print("ERRO: TAMANHO_PAGINA deve ser maior que zero e potencia de 2.")
         return False
     
-    if int(TAM_MEM_PRINCIPAL) <= 0 or int(TAM_MEM_PRINCIPAL) < int(TAM_PAGINA):
+    if TAMANHO_MEMORIA_P <= 0 or TAMANHO_MEMORIA_P < TAMANHO_PAGINA:
         print("ERRO: TAMANHO_MEMORIA deve ser maior que zero e maior que TAMANHO_PAGINA")
         return False
     

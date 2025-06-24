@@ -1,7 +1,6 @@
 import tkinter as t
 from tkinter import ttk
 from PIL import Image, ImageTk 
-import os
 import re
 
 class Tela_Configurar(t.Frame): 
@@ -97,7 +96,7 @@ class Tela_Configurar(t.Frame):
 
 
         # Criação do Combobox
-        combobox_unidade_memoriap = ttk.Combobox(
+        self.combobox_unidade_memoriap = ttk.Combobox(
             mainframe,
             textvariable=self.unidade_memoriap_combobox,
             values=["KB - KiloBytes", "MB - MegaBytes", "GB - GigaBytes"],
@@ -105,7 +104,7 @@ class Tela_Configurar(t.Frame):
             width=15 # Ajuste a largura conforme necessário
         )
 
-        combobox_unidade_memorias = ttk.Combobox(
+        self.combobox_unidade_memorias = ttk.Combobox(
             mainframe,
             textvariable=self.unidade_memorias_combobox,
             values=["KB - KiloBytes", "MB - MegaBytes", "GB - GigaBytes"],
@@ -113,7 +112,7 @@ class Tela_Configurar(t.Frame):
             width=15 # Ajuste a largura conforme necessário
         )
 
-        combobox_unidade_pagina = ttk.Combobox(
+        self.combobox_unidade_pagina = ttk.Combobox(
             mainframe,
             textvariable=self.unidade_pagina_combobox,
             values=["KB - KiloBytes", "MB - MegaBytes", "GB - GigaBytes"],
@@ -121,7 +120,7 @@ class Tela_Configurar(t.Frame):
             width=15 # Ajuste a largura conforme necessário
         )
 
-        combobox_unidade_quadro = ttk.Combobox(
+        self.combobox_unidade_quadro = ttk.Combobox(
             mainframe,
             textvariable=self.unidade_quadro_combobox,
             values=["KB - KiloBytes", "MB - MegaBytes", "GB - GigaBytes"],
@@ -129,7 +128,7 @@ class Tela_Configurar(t.Frame):
             width=15 # Ajuste a largura conforme necessário
         )
 
-        combobox_unidade_endlog = ttk.Combobox(
+        self.combobox_unidade_endlog = ttk.Combobox(
             mainframe,
             textvariable=self.unidade_endlog_combobox,
             values=["KB - KiloBytes", "MB - MegaBytes", "GB - GigaBytes"],
@@ -137,11 +136,11 @@ class Tela_Configurar(t.Frame):
             width=15 # Ajuste a largura conforme necessário
         )
 
-        combobox_unidade_memoriap.grid(column=1, row=3, sticky=(t.W, t.E), padx=10, pady=2)
-        combobox_unidade_memorias.grid(column=1, row=6, sticky=(t.W, t.E), padx=10, pady=2)
-        combobox_unidade_pagina.grid(column=1, row=9, sticky=(t.W, t.E), padx=10, pady=2)
-        combobox_unidade_quadro.grid(column=3, row=3, sticky=(t.W, t.E), padx=10, pady=2)
-        combobox_unidade_endlog.grid(column=3, row=6, sticky=(t.W, t.E), padx=10, pady=2)
+        self.combobox_unidade_memoriap.grid(column=1, row=3, sticky=(t.W, t.E), padx=10, pady=2)
+        self.combobox_unidade_memorias.grid(column=1, row=6, sticky=(t.W, t.E), padx=10, pady=2)
+        self.combobox_unidade_pagina.grid(column=1, row=9, sticky=(t.W, t.E), padx=10, pady=2)
+        self.combobox_unidade_quadro.grid(column=3, row=3, sticky=(t.W, t.E), padx=10, pady=2)
+        self.combobox_unidade_endlog.grid(column=3, row=6, sticky=(t.W, t.E), padx=10, pady=2)
 
 
         # Faz o espaçamento (após todos os widgets serem adicionados ao mainframe)
@@ -191,6 +190,12 @@ class Tela_Configurar(t.Frame):
         info_tam_endlog = self.tam_end_log_entry.get()
         info_num_lin_tlb = self.num_lin_tlb_entry.get()
 
+        info_unidade_memp = self.combobox_unidade_memoriap.get()
+        info_unidade_mems = self.combobox_unidade_memorias.get()
+        info_unidade_pag = self.combobox_unidade_pagina.get()
+        info_unidade_quadro = self.combobox_unidade_quadro.get()
+        info_unidade_endlog = self.combobox_unidade_endlog.get()
+
 
         # Lê o conteúdo atual
         try:
@@ -209,6 +214,12 @@ class Tela_Configurar(t.Frame):
             "TAM_QUADRO": f'"{info_tam_quadro}"',
             "TAM_END_LOGICO": f'"{info_tam_endlog}"',
             "NUM_LINHAS_TLB": f'"{info_num_lin_tlb}"',
+            "UNID_MEMP" : f'"{info_unidade_memp}"',
+            "UNID_MEMS" : f'"{info_unidade_mems}"',
+            "UNID_PAG" : f'"{info_unidade_pag}"',
+            "UNID_QUAD" : f'"{info_unidade_quadro}"',
+            "UNID_ENDLOG" : f'"{info_unidade_endlog}"',
+
         }
 
         # Atualiza ou adiciona as variáveis
