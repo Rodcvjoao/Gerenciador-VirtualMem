@@ -1,3 +1,5 @@
+from enum import Enum
+
 # Configurações do sistema de memória virtual
 # Estas configurações podem ser modificadas diretamente neste arquivo
 
@@ -43,6 +45,15 @@ for i in range(len(lista_unidade)):
 ARQ_TESTE = "aaaa.py"
 
 
+# Define a política a ser usada na substituição de quadros na MP
+# POLITICA_SUB = 0 -> LRU
+# POLITICA_SUB = 1 -> RELÓGIO DE UM BIT
+POLITICA_SUB = 0
+
+class PoliticaSub(Enum):
+    LRU = 0
+    Relogio = 1
+
 # Função para verificar se um número é potência de 2
 def ehPotenciaDeDois(n):
     
@@ -64,8 +75,8 @@ def validarConfiguracoes():
         print("ERRO: TAMANHO_PAGINA deve ser maior que zero e potencia de 2.")
         return False
     
-    if TAMANHO_MEMORIA_P <= 0 or TAMANHO_MEMORIA_P < TAMANHO_PAGINA:
-        print("ERRO: TAMANHO_MEMORIA deve ser maior que zero e maior que TAMANHO_PAGINA")
+    if TAMANHO_MEMORIA <= 0 or TAMANHO_MEMORIA < TAMANHO_PAGINA or not ehPotenciaDeDois(TAMANHO_MEMORIA):
+        print("ERRO: TAMANHO_MEMORIA deve ser maior que zero, maior que TAMANHO_PAGINA e potência de 2.")
         return False
     
     return True
