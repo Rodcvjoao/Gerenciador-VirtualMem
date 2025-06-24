@@ -5,12 +5,12 @@ from enum import Enum
 
 
 # Vinda das informações da interface
-TAM_MEM_PRINCIPAL = "1024"
-TAM_MEM_SECUNDARIA = "8"
-TAM_PAGINA = "8"
-TAM_QUADRO = "8"
-TAM_END_LOGICO = "8"
-NUM_LINHAS_TLB = "8"
+TAM_MEM_PRINCIPAL = "4"
+TAM_MEM_SECUNDARIA = "4"
+TAM_PAGINA = "2"
+TAM_QUADRO = "2"
+TAM_END_LOGICO = "2"
+NUM_LINHAS_TLB = "2"
 
 # Tratamento das strings para inteiros
 TAMANHO_MEMORIA_P = int(TAM_MEM_PRINCIPAL)
@@ -29,16 +29,9 @@ MAPA_UNIDADES = {
 # Valor padrão caso a unidade não seja KB ou MB (assumindo GB)
 VALOR_PADRAO = 2 ** 30
 
-# Tratamento das unidades para inteiros usando o dicionário
-UNID_MEMP = "KB"
-UNID_MEMS = "KB"
-UNID_PAG = "KB"
-UNID_QUAD = "KB"
-UNID_ENDLOG = "KB"
-
 
 # Pegando o nome do arquivo teste
-ARQ_TESTE = "aaaa.py"
+ARQ_TESTE = "amem.py"
 
 
 # Define a política a ser usada na substituição de quadros na MP
