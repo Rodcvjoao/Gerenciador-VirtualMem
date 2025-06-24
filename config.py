@@ -68,7 +68,7 @@ def validarConfiguracoes():
     Retorna True se tudo estiver ok, False caso contrário.
     """
     if NUMERO_LINHAS_TLB <= 0:
-        print("ERRO: TAMANHO_TLB deve ser maior que zero")
+        print("ERRO: NUMERO_LINHAS_TLB deve ser maior que zero")
         return False
     
     if TAMANHO_PAGINA <= 0 or not ehPotenciaDeDois(TAMANHO_PAGINA):  #Potência de 2
