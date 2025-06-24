@@ -21,24 +21,20 @@ TAMANHO_END_LOGICO = int(TAM_END_LOGICO)
 NUMERO_LINHAS_TLB = int(NUM_LINHAS_TLB)
 
 
-#Vinda da informação das unidades da interface - KB (2 ** 10), MB ( 2 ** 20 ) ou GB ( 2 ** 30 )
-UNID_MEMP = "KB - KiloBytes"
-UNID_MEMS = "MB - MegaBytes"
-UNID_PAG = "KB - KiloBytes"
-UNID_QUAD = "KB - KiloBytes"
-UNID_ENDLOG = "KB - KiloBytes"
+# Mapeamento de unidade para valor em bytes para centralizar a lógica
+MAPA_UNIDADES = {
+    "KB - KiloBytes": 2 ** 10,
+    "MB - MegaBytes": 2 ** 20
+}
+# Valor padrão caso a unidade não seja KB ou MB (assumindo GB)
+VALOR_PADRAO = 2 ** 30
 
-
-lista_unidade = [UNID_MEMP, UNID_MEMS, UNID_PAG, UNID_QUAD, UNID_ENDLOG]
-
-# Tratamento das unidades em strings para inteiros
-for i in range(len(lista_unidade)):
-    if (lista_unidade[i] == "KB - KiloBytes"):
-        lista_unidade[i] = 2 ** 10
-    elif (lista_unidade[i] == "MB - MegaBytes"):
-        lista_unidade[i] = 2 ** 20
-    else:
-        lista_unidade[i] = 2 ** 30
+# Tratamento das unidades para inteiros usando o dicionário
+UNID_MEMP = MAPA_UNIDADES.get(UNID_MEMP, VALOR_PADRAO)
+UNID_MEMS = MAPA_UNIDADES.get(UNID_MEMS, VALOR_PADRAO)
+UNID_PAG = MAPA_UNIDADES.get(UNID_PAG, VALOR_PADRAO)
+UNID_QUAD = MAPA_UNIDADES.get(UNID_QUAD, VALOR_PADRAO)
+UNID_ENDLOG = MAPA_UNIDADES.get(UNID_ENDLOG, VALOR_PADRAO)
 
 
 # Pegando o nome do arquivo teste
