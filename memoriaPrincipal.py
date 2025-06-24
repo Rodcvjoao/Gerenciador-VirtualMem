@@ -23,70 +23,63 @@ class MemoriaPrincipal:
         self.quadrosRefsLRU = []
         self.nextFrameRelogio = 0
 
-    # Usaremos essa função apenas na primeira vez que trouxermos o processo pra MP
-    # A função TENTA alocar quadros da MP para o processo e troca o estado do processo para pronto caso consiga
-    def carregaProcesso(self, processo):
-        entradasVazias = [e for e in processo.tabelaPagina.entradas if not e.bitPresenca]
-        indiceEV = 0
-        i = 0
-        while i < self.quantidadeQuadros and indiceEV < len(entradasVazias):
-            if self.quadros[i].pagina == None:
-                self.quadros[i].pagina = entradasVazias[indiceEV].pagina
-                self.quadros[i].bitUtilizado = True
-                self.quadrosRefsLRU.append(self.quadros[i])
-                
-                indiceEV += 1
-
-            # CHECAR SE TODAS AS PÁGINAS FORAM APROPRIADAMENTE ALOCADAS
-            # CASO CONTÁRIO, JOGAR PARA MEMÓRIA SECUNDÁRIA
-
-            i += 1
-        
-        processo.estado = "P" if indiceEV > 0 else processo.estado
-
-    def carregaPagina(self, processo, pagina):
+    def carregaPagina(self, processo, pagina_nova):
+        # Primeiro, verifica se há quadros livres
         for q in self.quadros:
-            if q.pagina == None:
-                q.pagina = pagina
+            if q.pagina is None:
+                q.pagina = pagina_nova
                 q.bitUtilizado = True
                 if q in self.quadrosRefsLRU:
                     # Se esse quadro já tiver sido referenciado, retire da sua posição atual
                     # e coloque no fim da fila. (Na política LRU, ele foi o mais recentemente acessado)
                     self.quadrosRefsLRU.pop(self.quadrosRefsLRU.index(q))
-                    self.quadrosRefsLRU.append(q)
-
-                # TODO: VERIFICAR SE ESSE PROCESSO NECESSARIAMENTE ESTARÁ COMO PRONTO
-                processo.estado = "P"
-                return
+                # Retorna o quadro alocado e None, pois nenhuma página foi substituída
+                return q, None
             
+        # Se não há quadros livres, chama a política de substituição
+        print("Nenhum quadro livre. Acionando política de substituição.")
+        quadro_usado, pagina_antiga = None, None
         match POLITICA_SUB:
             case PoliticaSub.LRU.value:
-                self.substituicaoLRU(pagina)
+                quadro_usado, pagina_antiga = self.substituicaoLRU(pagina_nova)
             case PoliticaSub.Relogio.value:
-                self.substituicaoRelogio(pagina)
+                quadro_usado, pagina_antiga = self.substituicaoRelogio(pagina_nova)
         
-    def substituicaoLRU(self, pagina):
-        quadroRemovido = self.quadrosRefsLRU.pop(0)
+        return quadro_usado, pagina_antiga
+        
+    def substituicaoLRU(self, pagina_nova):
+        quadroEscolhido = self.quadrosRefsLRU.pop(0)
+        pagina_antiga = quadroEscolhido.pagina # Salva a referência da página antiga
 
-        if quadroRemovido.pagina.modificada == True:
-            # Pagina presente no quadro vai para memória secundária
-            self.writeBack(quadroRemovido.pagina)
+        print(f"Substituição LRU: Sai P{pagina_antiga.idProcesso}(Página {pagina_antiga.idPagina}), Entra P{pagina_nova.idProcesso}(Página {pagina_nova.idPagina}) no Quadro {quadroEscolhido.idQuadro}")
 
-        quadroRemovido.pagina = pagina
-        self.quadrosRefsLRU.append(quadroRemovido)
+        if pagina_antiga.modificada:
+            self.writeBack(pagina_antiga)
 
-    def substituicaoRelogio(self, pagina):
+        # Coloca a nova página no quadro
+        quadroEscolhido.pagina = pagina_nova
+        self.quadrosRefsLRU.append(quadroEscolhido)
+
+        return quadroEscolhido, pagina_antiga # Retorna o quadro e a página que foi removida
+
+    def substituicaoRelogio(self, pagina_nova):
         while True:
-            quadroAnalisado = self.nextFrameRelogio % self.quantidadeQuadros
-            if self.quadros[quadroAnalisado].bitUtilizado == False:
-                if self.quadros[quadroAnalisado].pagina.modificada == True:
-                    self.writeBack(self.quadros[quadroAnalisado].pagina)
-                
-                self.quadros[quadroAnalisado].pagina = pagina
-                self.quadros[quadroAnalisado].bitUtilizado = True
-            else:
-                self.quadros[quadroAnalisado].bitUtilizado = False
+            quadroAtual = self.quadros[self.nextFrameRelogio % self.quantidadeQuadros]
+            
+            if not quadroAtual.bitUtilizado:
+                pagina_antiga = quadroAtual.pagina # Salva a referência
+                print(f"Substituição Relógio: Sai P{pagina_antiga.idProcesso}(Página {pagina_antiga.idPagina}), Entra P{pagina_nova.idProcesso}(Página {pagina_nova.idPagina}) no Quadro {quadroAtual.idQuadro}")
 
+                if pagina_antiga.modificada:
+                    self.writeBack(pagina_antiga)
+                
+                quadroAtual.pagina = pagina_nova
+                quadroAtual.bitUtilizado = True
+                self.nextFrameRelogio = (self.nextFrameRelogio + 1) % self.quantidadeQuadros
+                return quadroAtual, pagina_antiga # Retorna o quadro e a página removida
+            else:
+                quadroAtual.bitUtilizado = False
+                self.nextFrameRelogio = (self.nextFrameRelogio + 1) % self.quantidadeQuadros
             self.nextFrameRelogio += 1
 
     def writeBack(self, pagina):
