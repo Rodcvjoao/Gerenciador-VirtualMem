@@ -5,12 +5,12 @@ from enum import Enum
 
 
 # Vinda das informações da interface
-TAM_MEM_PRINCIPAL = "1"
-TAM_MEM_SECUNDARIA = "1"
-TAM_PAGINA = "1"
-TAM_QUADRO = "11"
-TAM_END_LOGICO = "1"
-NUM_LINHAS_TLB = "1"
+TAM_MEM_PRINCIPAL = "1024"
+TAM_MEM_SECUNDARIA = "8"
+TAM_PAGINA = "8"
+TAM_QUADRO = "8"
+TAM_END_LOGICO = "8"
+NUM_LINHAS_TLB = "8"
 
 # Tratamento das strings para inteiros
 TAMANHO_MEMORIA_P = int(TAM_MEM_PRINCIPAL)
@@ -30,11 +30,11 @@ MAPA_UNIDADES = {
 VALOR_PADRAO = 2 ** 30
 
 # Tratamento das unidades para inteiros usando o dicionário
-UNID_MEMP = MAPA_UNIDADES.get(UNID_MEMP, VALOR_PADRAO)
-UNID_MEMS = MAPA_UNIDADES.get(UNID_MEMS, VALOR_PADRAO)
-UNID_PAG = MAPA_UNIDADES.get(UNID_PAG, VALOR_PADRAO)
-UNID_QUAD = MAPA_UNIDADES.get(UNID_QUAD, VALOR_PADRAO)
-UNID_ENDLOG = MAPA_UNIDADES.get(UNID_ENDLOG, VALOR_PADRAO)
+UNID_MEMP = "KB"
+UNID_MEMS = "KB"
+UNID_PAG = "KB"
+UNID_QUAD = "KB"
+UNID_ENDLOG = "KB"
 
 
 # Pegando o nome do arquivo teste

@@ -1,35 +1,38 @@
 import tkinter as t
-from tkinter import ttk
-from PIL import Image, ImageTk 
+from tkinter import ttk, messagebox # Importar messagebox
+from PIL import Image, ImageTk
 import re
 
-class Tela_Configurar(t.Frame): 
-    
+class Tela_Configurar(t.Frame):
+
     def __init__(self, parent_frame, controller):
-        super().__init__(parent_frame, background='#181f30') 
+        super().__init__(parent_frame, background='#181f30')
         self.controller = controller
 
         style = ttk.Style()
         style.configure("Customize.TFrame", background="white")
-        self.configure(background= '#181f30') 
+        self.configure(background= '#181f30')
 
         for col in range(5):
             self.columnconfigure(col, weight=1)
         for row in range(8):
             self.rowconfigure(row, weight=1)
 
-        self.background_image_tk = None 
+        self.background_image_tk = None
         try:
+            # Mantendo o caminho original, mas alertando se não for encontrado
             imagem_fundo_pil = Image.open("Interface/Imagens/Página_Configurações_UI.png")
             self.background_image_tk = ImageTk.PhotoImage(imagem_fundo_pil)
 
             self.label_background = t.Label(self, image=self.background_image_tk, bg='#181f30')
-            self.label_background.image = self.background_image_tk 
-            self.label_background.grid(row=0, column=0, rowspan=8, columnspan=5, sticky="nsew") 
-            self.label_background.lower() 
+            self.label_background.image = self.background_image_tk
+            self.label_background.grid(row=0, column=0, rowspan=8, columnspan=5, sticky="nsew")
+            self.label_background.lower()
 
         except FileNotFoundError:
-            print("Erro: Imagem 'Página Configurações.png' não encontrada.")
+            print("Erro: Imagem 'Interface/Imagens/Página_Configurações_UI.png' não encontrada. Verifique o caminho.")
+            # Usando messagebox para erro de imagem, conforme solicitado
+            messagebox.showerror("Erro de Arquivo", "A imagem de fundo 'Página_Configurações_UI.png' não foi encontrada. Verifique o caminho no código.")
             t.Label(self, text="Imagem não encontrada!", fg="red", bg="white").grid(row=0, column=0, rowspan=8, columnspan=5, sticky="nsew")
 
 
@@ -39,7 +42,7 @@ class Tela_Configurar(t.Frame):
         for col in range(5):
             mainframe.columnconfigure(col, weight=0)
         # Ajuste o range de linhas conforme necessário para o layout
-        for lin in range(7): # Você pode ajustar para mais se precisar de mais linhas
+        for lin in range(9): # Reajustei aqui para que não haja conflito com o layout, garantindo espaço se o original fosse menor
             mainframe.rowconfigure(lin, weight=0)
 
         # Variáveis de entrada de texto
@@ -84,14 +87,14 @@ class Tela_Configurar(t.Frame):
 
 
         # Define um valor inicial (opcional, pode ser uma das opções ou vazio)
-        self.unidade_memoriap_combobox.set("KB - KiloBytes") 
-        self.unidade_memorias_combobox.set("KB - KiloBytes") 
-        self.unidade_pagina_combobox.set("KB - KiloBytes") 
-        self.unidade_quadro_combobox.set("KB - KiloBytes") 
-        self.unidade_endlog_combobox.set("KB - KiloBytes") 
+        self.unidade_memoriap_combobox.set("KB - KiloBytes")
+        self.unidade_memorias_combobox.set("KB - KiloBytes")
+        self.unidade_pagina_combobox.set("KB - KiloBytes")
+        self.unidade_quadro_combobox.set("KB - KiloBytes")
+        self.unidade_endlog_combobox.set("KB - KiloBytes")
 
 
-        # Label para a seção de unidades de memória
+        # Label para a seção de unidades de memória (originalmente vazia)
         t.Label(mainframe, bg='#FFFFFF').grid(column=1, row=0, sticky=t.W, padx=10, pady=5)
 
 
@@ -138,7 +141,7 @@ class Tela_Configurar(t.Frame):
 
         self.combobox_unidade_memoriap.grid(column=1, row=3, sticky=(t.W, t.E), padx=10, pady=2)
         self.combobox_unidade_memorias.grid(column=1, row=6, sticky=(t.W, t.E), padx=10, pady=2)
-        self.combobox_unidade_pagina.grid(column=1, row=9, sticky=(t.W, t.E), padx=10, pady=2)
+        self.combobox_unidade_pagina.grid(column=1, row=9, sticky=(t.W, t.E), padx=10, pady=2) # Mantido na linha 9 como você tinha, se houver espaço
         self.combobox_unidade_quadro.grid(column=3, row=3, sticky=(t.W, t.E), padx=10, pady=2)
         self.combobox_unidade_endlog.grid(column=3, row=6, sticky=(t.W, t.E), padx=10, pady=2)
 
@@ -147,9 +150,9 @@ class Tela_Configurar(t.Frame):
         for child in mainframe.winfo_children():
             child.grid_configure(padx=10, pady=6)
 
-        # Botão para Voltar 
+        # Botão para Voltar
         t.Button(
-            self, 
+            self,
             text="Voltar",
             height=2,
             width=15,
@@ -157,32 +160,68 @@ class Tela_Configurar(t.Frame):
             bg="#0C0E8B",
             font=("monospace", 10, "bold"),
             activebackground= "#393CD1",
-            command=lambda: self.controller.show_page("ui_pagina_inicial.py") 
-        ).place(x= 500, y= 230) 
+            command=lambda: self.controller.show_page("ui_pagina_inicial.py")
+        ).place(x= 500, y= 230)
 
         #Botão Enviar
         t.Button(
-            self, 
+            self,
             text="Enviar",
             height=2,
             width=15,
             fg="white",
             bg="#1ECC6F",
             font=("monospace", 10, "bold"),
-            command=self.salvar_configuracoes, 
+            command=self.salvar_configuracoes,
             activebackground="#696969"
         ).place(x= 500, y= 300)
 
+    # Função auxiliar para verificar se um número é potência de 2
+    def is_power_of_two(self, n):
+        try:
+            n_int = int(n) # Converte para inteiro, pois potências de 2 são geralmente inteiras
+        except ValueError:
+            return False # Não é um número inteiro
+
+        return n_int > 0 and (n_int & (n_int - 1) == 0)
 
     def salvar_configuracoes(self):
+        # Mapeamento das entradas e seus respectivos nomes para mensagens de erro
+        # Usando os nomes que aparecem nos Labels para clareza nas mensagens
+        entradas_a_validar = {
+            "Tamanho da Memória Física": self.tam_mem_fis_entry.get(),
+            "Tamanho da Memória Secundária": self.tam_mem_sec_entry.get(),
+            "Tamanho da Página do Processo": self.tam_pagina_entry.get(),
+            "Tamanho do Quadro de Memória": self.tam_quad_mem_entry.get(),
+            "Tamanho do Endereço Lógico": self.tam_end_log_entry.get(),
+            "Número de Linhas da TLB": self.num_lin_tlb_entry.get(),
+        }
 
-        self.pegar_info()  # Chama o método que coleta e salva as informações
-        self.controller.show_page("ui_pagina_input.py") # Navega para a próxima página
+        # Validação das entradas numéricas (apenas as que precisam ser potências de 2)
+        for nome_campo, valor_str in entradas_a_validar.items():
+            if not valor_str: # Verifica se o campo está vazio
+                messagebox.showerror("Erro de Validação", f"O campo '{nome_campo}' não pode estar vazio.")
+                return # Interrompe a função se houver erro
+
+            try:
+                valor_num = int(valor_str) # Tenta converter para inteiro
+            except ValueError:
+                messagebox.showerror("Erro de Validação", f"O valor para '{nome_campo}' deve ser um número inteiro.")
+                return # Interrompe a função se houver erro
+
+            if not self.is_power_of_two(valor_num):
+                messagebox.showerror("Erro de Validação", f"O valor para '{nome_campo}' deve ser uma potência de 2 (ex: 1, 2, 4, 8, 16, 32...).")
+                return # Interrompe a função se houver erro
+
+        # Se todas as validações passarem, prossegue com a coleta e salvamento das informações
+        self.pegar_info()
+        messagebox.showinfo("Sucesso", "Configurações salvas com sucesso!")
+        self.controller.show_page("ui_pagina_input.py") # Navega para a próxima página após sucesso
 
 
     # Leva as informações da interface para config
     def pegar_info(self):
-
+        # Coleta os valores JÁ VALIDADOS das entradas (convertendo para string)
         info_tam_memp = self.tam_mem_fis_entry.get()
         info_tam_mems = self.tam_mem_sec_entry.get()
         info_tam_pag = self.tam_pagina_entry.get()
@@ -190,6 +229,7 @@ class Tela_Configurar(t.Frame):
         info_tam_endlog = self.tam_end_log_entry.get()
         info_num_lin_tlb = self.num_lin_tlb_entry.get()
 
+        # Coleta os valores dos comboboxes
         info_unidade_memp = self.combobox_unidade_memoriap.get()
         info_unidade_mems = self.combobox_unidade_memorias.get()
         info_unidade_pag = self.combobox_unidade_pagina.get()
@@ -197,49 +237,58 @@ class Tela_Configurar(t.Frame):
         info_unidade_endlog = self.combobox_unidade_endlog.get()
 
 
-        # Lê o conteúdo atual
+        # Lê o conteúdo atual do config.py
         try:
             with open("config.py", "r") as arquivo:
                 linhas = arquivo.readlines()
         except FileNotFoundError:
-            print("Erro: O arquivo 'config.py' não foi encontrado. Criando um novo.")
+            print("Aviso: O arquivo 'config.py' não foi encontrado. Criando um novo.")
             linhas = [] # Começa com uma lista vazia se o arquivo não existir
 
 
         # Lista de variáveis que queremos salvar
         novas_configs = {
-            "TAM_MEM_PRINCIPAL": f'"{info_tam_memp}"',
-            "TAM_MEM_SECUNDARIA": f'"{info_tam_mems}"',
-            "TAM_PAGINA": f'"{info_tam_pag}"',
-            "TAM_QUADRO": f'"{info_tam_quadro}"',
-            "TAM_END_LOGICO": f'"{info_tam_endlog}"',
-            "NUM_LINHAS_TLB": f'"{info_num_lin_tlb}"',
-            "UNID_MEMP" : f'"{info_unidade_memp}"',
-            "UNID_MEMS" : f'"{info_unidade_mems}"',
-            "UNID_PAG" : f'"{info_unidade_pag}"',
-            "UNID_QUAD" : f'"{info_unidade_quadro}"',
-            "UNID_ENDLOG" : f'"{info_unidade_endlog}"',
-
+            "TAM_MEM_PRINCIPAL": info_tam_memp,
+            "TAM_MEM_SECUNDARIA": info_tam_mems,
+            "TAM_PAGINA": info_tam_pag,
+            "TAM_QUADRO": info_tam_quadro,
+            "TAM_END_LOGICO": info_tam_endlog,
+            "NUM_LINHAS_TLB": info_num_lin_tlb,
+            "UNID_MEMP" : info_unidade_memp.split(' ')[0], # Pega apenas "KB", "MB", "GB"
+            "UNID_MEMS" : info_unidade_mems.split(' ')[0],
+            "UNID_PAG" : info_unidade_pag.split(' ')[0],
+            "UNID_QUAD" : info_unidade_quadro.split(' ')[0],
+            "UNID_ENDLOG" : info_unidade_endlog.split(' ')[0],
         }
 
-        # Atualiza ou adiciona as variáveis
-        novas_linhas = []
+        # Atualiza ou adiciona as variáveis no conteúdo do arquivo
+        novas_linhas_conteudo = []
+        chaves_encontradas = set() # Para controlar chaves já atualizadas
+
         for linha in linhas:
             atualizado = False
             for chave, valor in novas_configs.items():
                 padrao = re.compile(rf"^{chave}\s*=")
                 if padrao.match(linha):
-                    novas_linhas.append(f"{chave} = {valor}\n")
+                    novas_linhas_conteudo.append(f"{chave} = \"{valor}\"\n") # Garante que o valor seja string entre aspas
                     atualizado = True
+                    chaves_encontradas.add(chave)
                     break
             if not atualizado:
-                novas_linhas.append(linha)
+                novas_linhas_conteudo.append(linha)
+
+        # Adiciona chaves que não existiam no arquivo (apenas as que não foram atualizadas)
+        for chave, valor in novas_configs.items():
+            if chave not in chaves_encontradas:
+                novas_linhas_conteudo.append(f"{chave} = \"{valor}\"\n")
 
 
         # Regrava o arquivo
         try:
             with open("config.py","w") as arquivo:
-                arquivo.writelines(novas_linhas)
-            print("Configuração salva/atualizada em: config.py")
+                arquivo.writelines(novas_linhas_conteudo)
+            # A mensagem de sucesso já foi mostrada em salvar_configuracoes
+            # print("Configuração salva/atualizada em: config.py")
         except IOError as e:
             print(f"Erro ao escrever no arquivo 'config.py': {e}")
+            messagebox.showerror("Erro de Escrita", f"Não foi possível salvar as configurações no arquivo 'config.py': {e}")
