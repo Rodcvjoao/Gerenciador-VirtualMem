@@ -5,9 +5,9 @@ from enum import Enum
 
 
 # Vinda das informações da interface
-TAM_MEM_PRINCIPAL = "4"
+TAM_MEM_PRINCIPAL = "8"
 TAM_MEM_SECUNDARIA = "4"
-TAM_PAGINA = "2"
+TAM_PAGINA = "8"
 TAM_QUADRO = "2"
 TAM_END_LOGICO = "2"
 NUM_LINHAS_TLB = "2"
@@ -20,11 +20,11 @@ TAMANHO_QUADRO = int(TAM_QUADRO)
 TAMANHO_END_LOGICO = int(TAM_END_LOGICO)
 NUMERO_LINHAS_TLB = int(NUM_LINHAS_TLB)
 
-UNID_MEMP = "KB - KiloBytes"
-UNID_MEMS = "MB - MegaBytes"
-UNID_PAG = "KB - KiloBytes"
-UNID_QUAD = "KB - KiloBytes"
-UNID_ENDLOG = "KB - KiloBytes"
+UNID_MEMP = "KB"
+UNID_MEMS = "KB"
+UNID_PAG = "KB"
+UNID_QUAD = "KB"
+UNID_ENDLOG = "KB"
 
 
 lista_unidade = [UNID_MEMP, UNID_MEMS, UNID_PAG, UNID_QUAD, UNID_ENDLOG]
@@ -40,7 +40,7 @@ for i in range(len(lista_unidade)):
 
 
 # Pegando o nome do arquivo teste
-ARQ_TESTE = "amem.py"
+ARQ_TESTE = "aleluia.py"
 
 
 # Define a política a ser usada na substituição de quadros na MP
@@ -52,33 +52,3 @@ class PoliticaSub(Enum):
     LRU = 0
     Relogio = 1
 
-# Função para verificar se um número é potência de 2
-def ehPotenciaDeDois(n):
-    
-    if n <= 0:
-        return False
-    return (n & (n - 1)) == 0
-
-# Função para validar as configurações
-def validarConfiguracoes():
-    """
-    Valida se as configurações estão em valores razoáveis.
-    Retorna True se tudo estiver ok, False caso contrário.
-    """
-    if NUMERO_LINHAS_TLB <= 0:
-        print("ERRO: NUMERO_LINHAS_TLB deve ser maior que zero")
-        return False
-    
-    if TAMANHO_PAGINA <= 0 or not ehPotenciaDeDois(TAMANHO_PAGINA):  #Potência de 2
-        print("ERRO: TAMANHO_PAGINA deve ser maior que zero e potencia de 2.")
-        return False
-    
-    if TAMANHO_MEMORIA <= 0 or TAMANHO_MEMORIA < TAMANHO_PAGINA or not ehPotenciaDeDois(TAMANHO_MEMORIA):
-        print("ERRO: TAMANHO_MEMORIA deve ser maior que zero, maior que TAMANHO_PAGINA e potência de 2.")
-        return False
-    
-    return True
-
-# Valida as configurações ao importar o módulo
-if not validarConfiguracoes():
-    raise ValueError("Configurações inválidas. Verifique o arquivo config.py") 
