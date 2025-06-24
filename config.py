@@ -3,14 +3,43 @@ from enum import Enum
 # Configurações do sistema de memória virtual
 # Estas configurações podem ser modificadas diretamente neste arquivo
 
-# Tamanho da TLB (número de entradas)
-TAMANHO_TLB = 16
 
-# Tamanho da página em bytes (1MB)
-TAMANHO_PAGINA = 2**20
+# Vinda das informações da interface
+TAM_MEM_PRINCIPAL = "1"
+TAM_MEM_SECUNDARIA = "1"
+TAM_PAGINA = "1"
+TAM_QUADRO = "11"
+TAM_END_LOGICO = "1"
+NUM_LINHAS_TLB = "1"
 
-# Tamanho total da memória física (1GB)
-TAMANHO_MEMORIA = 2**30
+# Tratamento das strings para inteiros
+TAMANHO_MEMORIA_P = int(TAM_MEM_PRINCIPAL)
+TAMANHO_MEMORIA_S = int(TAM_MEM_SECUNDARIA)
+TAMANHO_PAGINA = int(TAM_PAGINA)
+TAMANHO_QUADRO = int(TAM_QUADRO)
+TAMANHO_END_LOGICO = int(TAM_END_LOGICO)
+NUMERO_LINHAS_TLB = int(NUM_LINHAS_TLB)
+
+
+# Mapeamento de unidade para valor em bytes para centralizar a lógica
+MAPA_UNIDADES = {
+    "KB - KiloBytes": 2 ** 10,
+    "MB - MegaBytes": 2 ** 20
+}
+# Valor padrão caso a unidade não seja KB ou MB (assumindo GB)
+VALOR_PADRAO = 2 ** 30
+
+# Tratamento das unidades para inteiros usando o dicionário
+UNID_MEMP = MAPA_UNIDADES.get(UNID_MEMP, VALOR_PADRAO)
+UNID_MEMS = MAPA_UNIDADES.get(UNID_MEMS, VALOR_PADRAO)
+UNID_PAG = MAPA_UNIDADES.get(UNID_PAG, VALOR_PADRAO)
+UNID_QUAD = MAPA_UNIDADES.get(UNID_QUAD, VALOR_PADRAO)
+UNID_ENDLOG = MAPA_UNIDADES.get(UNID_ENDLOG, VALOR_PADRAO)
+
+
+# Pegando o nome do arquivo teste
+ARQ_TESTE = "aaaa.py"
+
 
 # Define a política a ser usada na substituição de quadros na MP
 # POLITICA_SUB = 0 -> LRU
@@ -23,6 +52,7 @@ class PoliticaSub(Enum):
 
 # Função para verificar se um número é potência de 2
 def ehPotenciaDeDois(n):
+    
     if n <= 0:
         return False
     return (n & (n - 1)) == 0
@@ -33,8 +63,8 @@ def validarConfiguracoes():
     Valida se as configurações estão em valores razoáveis.
     Retorna True se tudo estiver ok, False caso contrário.
     """
-    if TAMANHO_TLB <= 0:
-        print("ERRO: TAMANHO_TLB deve ser maior que zero")
+    if NUMERO_LINHAS_TLB <= 0:
+        print("ERRO: NUMERO_LINHAS_TLB deve ser maior que zero")
         return False
     
     if TAMANHO_PAGINA <= 0 or not ehPotenciaDeDois(TAMANHO_PAGINA):  #Potência de 2
