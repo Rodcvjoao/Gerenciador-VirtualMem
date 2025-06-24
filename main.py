@@ -127,8 +127,20 @@ for comando in seqComandos:
                 print(f"Erro: Processo P{idProcesso} já existe.")
                 continue
 
-            tamProcesso = int(comando[2])
-            # Lógica para unidades (KB, MB, GB) já feita no seu código original
+            tamanho, unidade = comando[2].split()
+            tamanho = int(tamanho)
+            
+            # Converter tamanho para bytes com base na unidade
+            if unidade == "KB":
+                tamProcesso = tamanho * 1024
+            elif unidade == "MB":
+                tamProcesso = tamanho * 1024 * 1024
+            elif unidade == "GB":
+                tamProcesso = tamanho * 1024 * 1024 * 1024
+            else:
+                print(f"Erro: Unidade '{unidade}' inválida para tamanho do processo.")
+                continue
+            
             novo_processo = Processo(idProcesso, tamProcesso)
             processosLista.append(novo_processo)
             print(f"P{idProcesso}: Processo criado com tamanho {tamProcesso} bytes.")
