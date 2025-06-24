@@ -221,7 +221,7 @@ class Tela_Configurar(t.Frame):
 
     # Leva as informações da interface para config
     def pegar_info(self):
-        # Coleta os valores JÁ VALIDADOS das entradas (convertendo para string)
+
         info_tam_memp = self.tam_mem_fis_entry.get()
         info_tam_mems = self.tam_mem_sec_entry.get()
         info_tam_pag = self.tam_pagina_entry.get()
@@ -254,11 +254,11 @@ class Tela_Configurar(t.Frame):
             "TAM_QUADRO": info_tam_quadro,
             "TAM_END_LOGICO": info_tam_endlog,
             "NUM_LINHAS_TLB": info_num_lin_tlb,
-            "UNID_MEMP" : info_unidade_memp.split(' ')[0], # Pega apenas "KB", "MB", "GB"
-            "UNID_MEMS" : info_unidade_mems.split(' ')[0],
-            "UNID_PAG" : info_unidade_pag.split(' ')[0],
-            "UNID_QUAD" : info_unidade_quadro.split(' ')[0],
-            "UNID_ENDLOG" : info_unidade_endlog.split(' ')[0],
+            "UNID_MEMP" : info_unidade_memp, 
+            "UNID_MEMS" : info_unidade_mems,
+            "UNID_PAG" : info_unidade_pag,
+            "UNID_QUAD" : info_unidade_quadro,
+            "UNID_ENDLOG" : info_unidade_endlog,
         }
 
         # Atualiza ou adiciona as variáveis no conteúdo do arquivo
