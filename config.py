@@ -3,12 +3,12 @@
 
 
 # Vinda das informações da interface
-TAM_MEM_PRINCIPAL = "1024"
-TAM_MEM_SECUNDARIA = "1024"
-TAM_PAGINA = "1024"
-TAM_QUADRO = "216"
-TAM_END_LOGICO = "312"
-NUM_LINHAS_TLB = "14"
+TAM_MEM_PRINCIPAL = "1"
+TAM_MEM_SECUNDARIA = "1"
+TAM_PAGINA = "1"
+TAM_QUADRO = "11"
+TAM_END_LOGICO = "1"
+NUM_LINHAS_TLB = "1"
 
 # Tratamento das strings para inteiros
 TAMANHO_MEMORIA_P = int(TAM_MEM_PRINCIPAL)
@@ -20,11 +20,11 @@ NUMERO_LINHAS_TLB = int(NUM_LINHAS_TLB)
 
 
 #Vinda da informação das unidades da interface - KB (2 ** 10), MB ( 2 ** 20 ) ou GB ( 2 ** 30 )
-UNID_MEMP = "MB - MegaBytes"
-UNID_MEMS = "KB - KiloBytes"
+UNID_MEMP = "KB - KiloBytes"
+UNID_MEMS = "MB - MegaBytes"
 UNID_PAG = "KB - KiloBytes"
-UNID_QUAD = "GB - GigaBytes"
-UNID_ENDLOG = "MB - MegaBytes"
+UNID_QUAD = "KB - KiloBytes"
+UNID_ENDLOG = "KB - KiloBytes"
 
 
 lista_unidade = [UNID_MEMP, UNID_MEMS, UNID_PAG, UNID_QUAD, UNID_ENDLOG]
@@ -37,6 +37,10 @@ for i in range(len(lista_unidade)):
         lista_unidade[i] = 2 ** 20
     else:
         lista_unidade[i] = 2 ** 30
+
+
+# Pegando o nome do arquivo teste
+ARQ_TESTE = "aaaa.py"
 
 
 # Função para verificar se um número é potência de 2

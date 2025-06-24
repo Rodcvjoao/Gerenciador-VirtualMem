@@ -1,7 +1,7 @@
 import tkinter as t
 from tkinter import ttk
 from PIL import Image, ImageTk
-
+import re
 
 class Tela_Input(t.Frame):
 
@@ -53,6 +53,20 @@ class Tela_Input(t.Frame):
         for lin in range(5):
             auxiliar_botao.rowconfigure(row, weight=0)
 
+        m = t.Frame(self)
+        m.place(x= 210, y= 240)
+
+        for col in range(10):
+            m.columnconfigure(col, weight=0)
+        # Ajuste o range de linhas conforme necessário para o layout
+        for lin in range(10): # Você pode ajustar para mais se precisar de mais linhas
+            m.rowconfigure(lin, weight=0)
+
+        self.entrada = t.StringVar()
+        self.entrada_entry = t.Entry(m, width=40, textvariable=self.entrada)
+        self.entrada_entry.grid(row=3, column = 4,sticky=(t.W,t.E))
+        t.Label(m, bg= '#FFFFFF').place(x= 210, y= 240)
+
 
         # Inserção de Botão Enviar
         t.Button(
@@ -63,10 +77,16 @@ class Tela_Input(t.Frame):
             fg="#FFFFFF",
             bg="#1ECC6F",
             font=("monospace", 12, "bold"),
-            command=lambda: self.controller.show_page("ui_pagina_simular.py"),
+            command= self.salvar_config,
             activebackground="#696969", # 
             activeforeground="#FFFFFF", # Cor do texto ao clicar (um cinza claro)
         ).grid(row= 2, column= 4, sticky= "ew")
+
+
+    def salvar_config(self):
+
+        self.pegar_arquivo_teste()  # Chama o método que coleta e salva as informações
+        self.controller.show_page("ui_pagina_simular.py") # Navega para a próxima página
 
 
         auxiliar_botao2 = ttk.Frame(self, style= "Custom.TFrame")
@@ -76,7 +96,7 @@ class Tela_Input(t.Frame):
             auxiliar_botao2.columnconfigure(col, weight=0)
         
         for lin in range(5):
-            auxiliar_botao2.rowconfigure(row, weight=0)
+            auxiliar_botao2.rowconfigure(lin, weight=0)
 
 
         # Inserção de Botão Voltar
@@ -93,16 +113,45 @@ class Tela_Input(t.Frame):
             activeforeground="#FFFFFF", # Cor do texto ao clicar (um cinza claro)
         ).grid(row= 0, column= 1, sticky= "ew")
         
-        m = t.Frame(self)
-        m.place(x= 210, y= 240)
 
-        for col in range(10):
-            m.columnconfigure(col, weight=0)
-        # Ajuste o range de linhas conforme necessário para o layout
-        for lin in range(10): # Você pode ajustar para mais se precisar de mais linhas
-            m.rowconfigure(lin, weight=0)
 
-        self.entrada = t.StringVar()
-        entrada_entry = t.Entry(m, width=40, textvariable=self.entrada)
-        entrada_entry.grid(row=3, column = 4,sticky=(t.W,t.E))
-        t.Label(m, bg= '#FFFFFF').place(x= 210, y= 240)
+
+    def pegar_arquivo_teste(self):
+
+        caminho = self.entrada_entry.get()
+
+        # Lê o conteúdo atual
+        try:
+            with open("config.py", "r") as arquivo:
+                linhas = arquivo.readlines()
+        except FileNotFoundError:
+            print("Erro: O arquivo não foi encontrado. Criando um novo.")
+            linhas = [] # Começa com uma lista vazia se o arquivo não existir
+        
+        # Lista de variáveis que queremos salvar
+        novas_configs = {
+            "ARQ_TESTE": f'"{caminho}"',
+        }
+
+        # Atualiza ou adiciona as variáveis
+        novas_linhas = []
+        for linha in linhas:
+            atualizado = False
+            for chave, valor in novas_configs.items():
+                padrao = re.compile(rf"^{chave}\s*=")
+                if padrao.match(linha):
+                    novas_linhas.append(f"{chave} = {valor}\n")
+                    atualizado = True
+                    break
+            if not atualizado:
+                novas_linhas.append(linha)
+
+
+        # Regrava o arquivo
+        try:
+            with open("config.py","w") as arquivo:
+                arquivo.writelines(novas_linhas)
+            print("Configuração salva/atualizada em: config.py")
+        except IOError as e:
+            print(f"Erro ao escrever no arquivo 'config.py': {e}")
+
