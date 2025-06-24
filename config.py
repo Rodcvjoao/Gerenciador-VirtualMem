@@ -71,8 +71,8 @@ def validarConfiguracoes():
         print("ERRO: TAMANHO_PAGINA deve ser maior que zero e potencia de 2.")
         return False
     
-    if TAMANHO_MEMORIA <= 0 or TAMANHO_MEMORIA < TAMANHO_PAGINA or not ehPotenciaDeDois(TAMANHO_MEMORIA):
-        print("ERRO: TAMANHO_MEMORIA deve ser maior que zero, maior que TAMANHO_PAGINA e potência de 2.")
+    if TAMANHO_MEMORIA_P <= 0 or TAMANHO_MEMORIA_P < TAMANHO_PAGINA or not ehPotenciaDeDois(TAMANHO_MEMORIA_P):
+        print("ERRO: TAMANHO_MEMORIA_P deve ser maior que zero, maior que TAMANHO_PAGINA e potência de 2.")
         return False
     
     return True
