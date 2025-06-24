@@ -83,12 +83,6 @@ class Tela_Input(t.Frame):
         ).grid(row= 2, column= 4, sticky= "ew")
 
 
-    def salvar_config(self):
-
-        self.pegar_arquivo_teste()  # Chama o método que coleta e salva as informações
-        self.controller.show_page("ui_pagina_simular.py") # Navega para a próxima página
-
-
         auxiliar_botao2 = ttk.Frame(self, style= "Custom.TFrame")
         auxiliar_botao2.grid(column= 1, row= 2, columnspan=5, sticky= "w")
 
@@ -112,8 +106,11 @@ class Tela_Input(t.Frame):
             activebackground="#393CD1", # Cor de fundo ao clicar (um azul um pouco mais escuro)
             activeforeground="#FFFFFF", # Cor do texto ao clicar (um cinza claro)
         ).grid(row= 0, column= 1, sticky= "ew")
-        
 
+    def salvar_config(self):
+
+        self.pegar_arquivo_teste()  # Chama o método que coleta e salva as informações
+        self.controller.show_page("ui_pagina_simular.py") # Navega para a próxima página
 
 
     def pegar_arquivo_teste(self):
