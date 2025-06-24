@@ -23,29 +23,17 @@ class MemoriaPrincipal:
         self.quadrosRefsLRU = []
         self.nextFrameRelogio = 0
 
-    # Usaremos essa função apenas na primeira vez que trouxermos o processo pra MP
-    # A função TENTA alocar quadros da MP para o processo e troca o estado do processo para pronto caso consiga
-    def carregaProcesso(self, processo):
-        entradasVazias = [e for e in processo.tabelaPagina.entradas if not e.bitPresenca]
-        indiceEV = 0
-        i = 0
-        while i < self.quantidadeQuadros and indiceEV < len(entradasVazias):
-            if self.quadros[i].pagina == None:
-                self.quadros[i].pagina = entradasVazias[indiceEV].pagina
-                self.quadros[i].bitUtilizado = True
-                self.quadrosRefsLRU.append(self.quadros[i])
-                
-                indiceEV += 1
+    def referenciar_quadro_lru(self, quadro):
+        """
+        Atualiza a posição de um quadro na lista do LRU, movendo-o para o final (mais recente).
+        Isso deve ser chamado a cada acesso a uma página.
+        """
+        if quadro in self.quadrosRefsLRU:
+            # Remove de sua posição atual
+            self.quadrosRefsLRU.remove(quadro)
+        # Adiciona no final da lista (mais recentemente usado)
+        self.quadrosRefsLRU.append(quadro)
 
-            # CHECAR SE TODAS AS PÁGINAS FORAM APROPRIADAMENTE ALOCADAS
-            # CASO CONTÁRIO, JOGAR PARA MEMÓRIA SECUNDÁRIA
-
-            i += 1
-        
-        processo.estado = "P" if indiceEV > 0 else processo.estado
-
-# - fiz a Refatoraão de memoriaPrincipal.py para retornar o quadro alocado
-# Precisamos que as funções que alocam um quadro o retornem para o chamador.
 
     def carregaPagina(self, processo, pagina_nova):
         # Primeiro, verifica se há quadros livres
@@ -53,11 +41,9 @@ class MemoriaPrincipal:
             if q.pagina is None:
                 q.pagina = pagina_nova
                 q.bitUtilizado = True
-                if q not in self.quadrosRefsLRU:
-                    self.quadrosRefsLRU.append(q)
-                
-                # Retorna o quadro alocado e None, pois nenhuma página foi substituída
-                return q, None
+                # Apenas adiciona ao final, pois é o primeiro uso
+                self.quadrosRefsLRU.append(q)
+                return q, None # Retorna o quadro alocado e None (nenhuma página substituída
             
         # Se não há quadros livres, chama a política de substituição
         print("Nenhum quadro livre. Acionando política de substituição.")

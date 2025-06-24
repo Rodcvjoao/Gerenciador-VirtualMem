@@ -19,17 +19,25 @@ def tratar_acesso_memoria(processo, endereco_virtual, tlb, mp, tipo_acesso, proc
 
     # 2. Trata o resultado
     if not page_fault:
-        # Acesso bem-sucedido (pode ter sido TLB hit ou miss, mas a página está na memória)
+        # Acesso bem-sucedido
         numero_pagina_virtual = endereco_virtual // TAMANHO_PAGINA
-        
-        # Se foi TLB miss (caso contrário a função teria retornado antes), a TLB é atualizada
         entrada_tp = processo.tabelaPaginas.entradas[numero_pagina_virtual]
-        tlb.inserir(processo.id, numero_pagina_virtual, entrada_tp.enderecoMemoriaPrincipal)
+        numero_frame = entrada_tp.enderecoMemoriaPrincipal
+
+        # Atualiza a referência para a política LRU
+        quadro_acessado = mp.quadros[numero_frame]
+        mp.referenciar_quadro_lru(quadro_acessado)
+
+        # Atualiza a TLB (se foi um miss na TLB)
+        tlb.inserir(processo.id, numero_pagina_virtual, numero_frame)
         
         print(f"P{processo.id}: Endereço encontrado na Memória Principal. Endereço Físico: {endereco_fisico}")
 
     else: # Ocorreu um Page Fault
         print(f"P{processo.id}: FALTA DE PÁGINA (Page Fault) para o endereço virtual {endereco_virtual}!")
+        
+        # 1. O processo é movido para o estado 'Bloqueado' (B)
+        #    pois precisa esperar a operação de I/O do disco (carregar a página).
         processo.estado = "B"
 
         numero_pagina_necessaria = endereco_virtual // TAMANHO_PAGINA
@@ -75,9 +83,7 @@ def tratar_acesso_memoria(processo, endereco_virtual, tlb, mp, tipo_acesso, proc
         quadro_correspondente.pagina.modificada = True
         entrada_tp.bitModificacao = True # Também pode ser útil ter o bit na TP
         print(f"P{processo.id}: Página {numero_pagina_virtual} marcada como modificada (M=1).")
-
-#fim da mudança 2
-
+        
 def print_estado_sistema(mp, tlb, processos):
     """
     Imprime o estado atual de todos os componentes do sistema para depuração.
