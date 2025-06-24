@@ -65,7 +65,7 @@ class Tela_Input(t.Frame):
         self.entrada = t.StringVar()
         self.entrada_entry = t.Entry(m, width=40, textvariable=self.entrada)
         self.entrada_entry.grid(row=3, column = 4,sticky=(t.W,t.E))
-        t.Label(m, bg= '#FFFFFF').place(x= 210, y= 240)
+        t.Label(m, bg='#FFFFFF').grid(row=3, column=4, sticky=(t.W, t.E))
 
 
         # Inserção de Botão Enviar
