@@ -23,27 +23,18 @@ class MemoriaPrincipal:
         self.quadrosRefsLRU = []
         self.nextFrameRelogio = 0
 
-    def referenciar_quadro_lru(self, quadro):
-        """
-        Atualiza a posição de um quadro na lista do LRU, movendo-o para o final (mais recente).
-        Isso deve ser chamado a cada acesso a uma página.
-        """
-        if quadro in self.quadrosRefsLRU:
-            # Remove de sua posição atual
-            self.quadrosRefsLRU.remove(quadro)
-        # Adiciona no final da lista (mais recentemente usado)
-        self.quadrosRefsLRU.append(quadro)
-
-
     def carregaPagina(self, processo, pagina_nova):
         # Primeiro, verifica se há quadros livres
         for q in self.quadros:
             if q.pagina is None:
                 q.pagina = pagina_nova
                 q.bitUtilizado = True
-                # Apenas adiciona ao final, pois é o primeiro uso
-                self.quadrosRefsLRU.append(q)
-                return q, None # Retorna o quadro alocado e None (nenhuma página substituída
+                if q in self.quadrosRefsLRU:
+                    # Se esse quadro já tiver sido referenciado, retire da sua posição atual
+                    # e coloque no fim da fila. (Na política LRU, ele foi o mais recentemente acessado)
+                    self.quadrosRefsLRU.pop(self.quadrosRefsLRU.index(q))
+                # Retorna o quadro alocado e None, pois nenhuma página foi substituída
+                return q, None
             
         # Se não há quadros livres, chama a política de substituição
         print("Nenhum quadro livre. Acionando política de substituição.")
@@ -89,14 +80,11 @@ class MemoriaPrincipal:
             else:
                 quadroAtual.bitUtilizado = False
                 self.nextFrameRelogio = (self.nextFrameRelogio + 1) % self.quantidadeQuadros
+            self.nextFrameRelogio += 1
 
     def writeBack(self, pagina):
-        print(f"WRITE-BACK: Salvando página {pagina.idPagina} do processo P{pagina.idProcesso} na memória secundária.")
-        # Lógica de escrita em disco (simulada)
-        pagina.modificada = False # Reseta o bit M
         pass
 
-#fim da mudança 1
 class Quadro:
     def __init__(self, indiceQuadro):
         self.idQuadro = indiceQuadro
