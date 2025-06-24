@@ -1,8 +1,12 @@
+from Interface import ui_pagina_configurar as ui_conf
+
 # Configurações do sistema de memória virtual
 # Estas configurações podem ser modificadas diretamente neste arquivo
 
+
 # Tamanho da TLB (número de entradas)
-TAMANHO_TLB = 16
+TAMANHO_TLB = ui_conf.Tela_Configurar
+
 
 # Tamanho da página em bytes (1MB)
 TAMANHO_PAGINA = 2**20
