@@ -1,5 +1,6 @@
+
 import tkinter as t
-from tkinter import ttk
+from tkinter import ttk, filedialog, messagebox
 from PIL import Image, ImageTk
 
 import re
@@ -7,9 +8,10 @@ import re
 class Tela_Input(t.Frame):
 
     def __init__(self,parent_frame,controller):
-
         super().__init__(parent_frame)
         self.controller = controller
+        self.configure(background='#181f30')
+        self.grid_columnconfigure(0, weight=1)
 
         style = ttk.Style()
         style.configure("Custom.TFrame", background="white")
@@ -35,18 +37,13 @@ class Tela_Input(t.Frame):
             self.label_background.grid(row=0, column=0, rowspan=3, columnspan=5, sticky="nsew")
             self.label_background.lower() # Garante que fique no fundo, abaixo de outros widgets
 
-
         except FileNotFoundError:
-            print("Erro: Imagem 'Página Input UI.png' não encontrada.")
-            # Se a imagem não for encontrada, exibe um Label de erro centralizado
-            t.Label(self, text="Imagem não encontrada!", fg="red", bg="white").grid(row=0, column=0, rowspan=3, columnspan=5, sticky="nsew")
+            # Em caso de erro, um label simples para não quebrar o layout
+            t.Label(self, text="Imagem de fundo não encontrada", fg="red", bg="#181f30").grid(row=0, column=0)
 
 
-        # --- RESTANTE DOS SEUS WIDGETS (EXATAMENTE COMO ESTAVAM) ---
-        # O auxiliar_botao e o botão dentro dele manterão seu posicionamento original
-        # mas agora aparecerão acima do label_background
-        auxiliar_botao = ttk.Frame(self, style= "Custom.TFrame")
-        auxiliar_botao.grid(column= 3, row= 2, columnspan=5, sticky= "w")
+        content_frame = t.Frame(self, bg="white", padx=20, pady=20, relief="groove", borderwidth=2)
+        content_frame.grid(row=1, column=0, sticky="") # sticky="" centraliza
 
         for col in range(5):
             auxiliar_botao.columnconfigure(col, weight=0)
@@ -72,7 +69,6 @@ class Tela_Input(t.Frame):
         # Ex: t.Label(m, text="Caminho do Arquivo:", bg='#FFFFFF').grid(row=2, column=4, sticky=t.W) # Em outra linha/coluna
 
 
-        # Inserção de Botão Enviar
         t.Button(
             auxiliar_botao,
             text="Enviar",
@@ -96,10 +92,8 @@ class Tela_Input(t.Frame):
         for lin in range(5):
             auxiliar_botao2.rowconfigure(lin, weight=0)
 
-
-        # Inserção de Botão Voltar
         t.Button(
-            auxiliar_botao2,
+            botoes_frame,
             text="Voltar",
             height=2,
             width=20,
@@ -125,6 +119,27 @@ class Tela_Input(t.Frame):
         t.messagebox.showinfo("Sucesso", "Caminho do arquivo salvo com sucesso!")
         self.controller.show_page("ui_pagina_simular.py")
 
+        t.Button(
+            botoes_frame,
+            text="Simular",
+            height=2, width=15, fg="#FFFFFF", bg="#1ECC6F", font=("monospace", 11, "bold"),
+            command=self.salvar_e_simular,
+        ).pack(side=t.LEFT, padx=20)
+
+
+    def procurar_arquivo(self):
+        caminho = filedialog.askopenfilename(
+            title="Selecione o arquivo de teste",
+            filetypes=(("Arquivos de Texto", "*.txt"), ("Todos os arquivos", "*.*"))
+        )
+        if caminho:
+            self.entrada.set(caminho)
+
+    def salvar_e_simular(self):
+        caminho = self.entrada.get()
+        if not caminho:
+            messagebox.showwarning("Campo Vazio", "Por favor, digite ou selecione um arquivo de teste antes de simular.")
+            return
 
     def pegar_arquivo_teste(self):
 

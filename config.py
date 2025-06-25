@@ -1,8 +1,13 @@
 from enum import Enum
 
-# Configurações do sistema de memória virtual
-# Estas configurações podem ser modificadas diretamente neste arquivo
 
+POLITICA_SUB = 0  # 0 para LRU, 1 para Relógio
+TAM_MEM_PRINCIPAL = "128"
+TAM_PAGINA = "4"
+NUM_LINHAS_TLB = "16"
+TAM_MEM_SECUNDARIA = "512"
+TAM_QUADRO = TAM_PAGINA
+TAM_END_LOGICO = "16"
 
 # Vinda das informações da interface
 TAM_MEM_PRINCIPAL = "8"
@@ -12,13 +17,6 @@ TAM_QUADRO = "2"
 TAM_END_LOGICO = "2"
 NUM_LINHAS_TLB = "2"
 
-# Tratamento das strings para inteiros
-TAMANHO_MEMORIA_P = int(TAM_MEM_PRINCIPAL)
-TAMANHO_MEMORIA_S = int(TAM_MEM_SECUNDARIA)
-TAMANHO_PAGINA = int(TAM_PAGINA)
-TAMANHO_QUADRO = int(TAM_QUADRO)
-TAMANHO_END_LOGICO = int(TAM_END_LOGICO)
-NUMERO_LINHAS_TLB = int(NUM_LINHAS_TLB)
 
 UNID_MEMP = "KB"
 UNID_MEMS = "KB"

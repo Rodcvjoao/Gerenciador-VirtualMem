@@ -1,184 +1,146 @@
+import re
 from memoriaPrincipal import MemoriaPrincipal
 from tlb import TLB
 from classesProcessos import Processo
 from config import *
 
-# ===================
-# FUNÇÕES AUXILIARES 
-# ===================
+# ... (FUNÇÕES AUXILIARES) ...
+def tratar_acesso_memoria(processo, endereco_virtual, tlb, mp, tipo_acesso, processos_lista):
+    print(f"\n[Acesso] P{processo.id}: Tentando acesso '{tipo_acesso}' ao endereço virtual {endereco_virtual}")
+    processo.estado = "E"
 
-def tratar_acesso_memoria(processo, endereco_virtual, tlb, mp, tipo_acesso):
-    """
-    Orquestra a tradução de endereço, tratando acertos e falhas na TLB e na Tabela de Páginas.
-    """
-    print(f"P{processo.id}: Tentando acesso '{tipo_acesso}' ao endereço virtual {endereco_virtual}")
-    processo.estado = "E"  # Executando
-
-    # 1. Tentar buscar na TLB primeiro
-    numero_frame = tlb.buscar(processo.id, endereco_virtual // TAMANHO_PAGINA)
+    numero_pagina_virtual = endereco_virtual // TAMANHO_PAGINA
     
-    if numero_frame is not None:
-        # Acerto na TLB (TLB Hit)
-        offset = endereco_virtual % TAMANHO_PAGINA
-        endereco_fisico = numero_frame * TAMANHO_PAGINA + offset
-        print(f"P{processo.id}: Acerto na TLB! Endereço Físico: {endereco_fisico}")
+    if numero_pagina_virtual >= processo.quantidadePaginas:
+        print(f"!!! ERRO DE SEGMENTAÇÃO !!!: Endereço {endereco_virtual} está fora do espaço de endereçamento do P{processo.id}.")
+        processo.estado = "F"
+        return
+
+    endereco_fisico, page_fault = processo.tabelaPaginas.traduzirEndereco(endereco_virtual, tlb)
+
+    if not page_fault:
+        print(f"P{processo.id}: Endereço encontrado na Memória Principal.")
     else:
-        # Falha na TLB (TLB Miss)
-        print(f"P{processo.id}: Falha na TLB. Consultando Tabela de Páginas...")
-        
-        # 2. Consultar a Tabela de Páginas
-        entrada_tp = processo.tabelaPaginas.entradas[endereco_virtual // TAMANHO_PAGINA]
+        print(f"P{processo.id}: FALTA DE PÁGINA (Page Fault) para o endereço virtual {endereco_virtual}!")
+        processo.estado = "B"
 
-        if not entrada_tp.bitPresenca:
-            # Falta de Página (Page Fault)
-            print(f"P{processo.id}: FALTA DE PÁGINA (Page Fault) para a página {endereco_virtual // TAMANHO_PAGINA}!")
-            processo.estado = "B" # Bloqueia o processo enquanto trata a falta
-            
-            pagina_necessaria = entrada_tp.pagina
-            
-            # 3. Chamar a Memória Principal para carregar a página (e possivelmente substituir)
-            quadro_alocado = mp.carregaPagina(processo, pagina_necessaria)
-            
-            # TODO: Atualizar a Entrada da Tabela de Páginas com as informações corretas
-            # entrada_tp.bitPresenca = True
-            # entrada_tp.enderecoMemoriaPrincipal = quadro_alocado.idQuadro
-            
-            print(f"P{processo.id}: Página {pagina_necessaria.idPagina} carregada no quadro {quadro_alocado.idQuadro}.")
-            
-            # 4. Agora que a página está na memória, insira na TLB
-            tlb.inserir(processo.id, endereco_virtual // TAMANHO_PAGINA, quadro_alocado.idQuadro)
-            
-            # Processo volta para o estado de Pronto
-            processo.estado = "P"
+        pagina_necessaria = processo.tabelaPaginas.entradas[numero_pagina_virtual].pagina
+        quadro_alocado, pagina_substituida = mp.carregaPagina(processo, pagina_necessaria)
 
-        else:
-            # Página encontrada na Tabela de Páginas
-            numero_frame = entrada_tp.enderecoMemoriaPrincipal
-            offset = endereco_virtual % TAMANHO_PAGINA
-            endereco_fisico = numero_frame * TAMANHO_PAGINA + offset
-            print(f"P{processo.id}: Página encontrada na Tabela de Páginas. Endereço Físico: {endereco_fisico}")
-            
-            # 5. Inserir na TLB para futuros acessos
-            tlb.inserir(processo.id, endereco_virtual // TAMANHO_PAGINA, numero_frame)
+        if pagina_substituida:
+            processo_dono = next((p for p in processos_lista if p.id == pagina_substituida.idProcesso), None)
+            if processo_dono:
+                entrada_antiga = processo_dono.tabelaPaginas.entradas[pagina_substituida.idPagina]
+                entrada_antiga.bitPresenca = False
+                entrada_antiga.enderecoMemoriaPrincipal = None
+                tlb.invalidar_entrada(processo_dono.id, pagina_substituida.idPagina)
+                print(f"Página {pagina_substituida.idPagina} do processo P{processo_dono.id} invalidada.")
 
-    # Se o acesso for de escrita, marcar a página como modificada
+        processo.tabelaPaginas.entradas[numero_pagina_virtual].bitPresenca = True
+        processo.tabelaPaginas.entradas[numero_pagina_virtual].enderecoMemoriaPrincipal = quadro_alocado.idQuadro
+        print(f"P{processo.id}: Página {pagina_necessaria.idPagina} carregada no quadro {quadro_alocado.idQuadro}.")
+
+        tlb.inserir(processo.id, numero_pagina_virtual, quadro_alocado.idQuadro)
+        processo.estado = "P"
+
     if tipo_acesso == "W":
-        print(f"P{processo.id}: Marcando página como modificada.")
-        # TODO: Encontrar o objeto da página na memória e setar pagina.modificada = True
-        # pagina_acessada = ...
-        # pagina_acessada.modificada = True
-
+        entrada_tp = processo.tabelaPaginas.entradas[numero_pagina_virtual]
+        quadro_correspondente = mp.quadros[entrada_tp.enderecoMemoriaPrincipal]
+        quadro_correspondente.pagina.modificada = True
+        entrada_tp.bitModificacao = True
+        print(f"P{processo.id}: Página {numero_pagina_virtual} marcada como modificada (M=1).")
 
 def print_estado_sistema(mp, tlb, processos):
-    """
-    Imprime o estado atual de todos os componentes do sistema para depuração.
-    """
-    print("\n" + "="*40)
+    print("\n" + "="*50)
     print("ESTADO ATUAL DO SISTEMA")
-    print("="*40)
-    
-    # TODO: Implementar um método print_estado() na classe MemoriaPrincipal
-    # mp.print_estado()
-    
-
+    print("="*50)
     tlb.print_estado()
-    
-    print("\n--- Estado dos Processos e Tabelas de Páginas ---")
+    print("\n--- Estado dos Processos ---")
     for p in processos:
         print(f"  P{p.id} - Estado: {p.estado}")
-        # TODO: Implementar um método print_estado() na classe TabelaPaginas
-        # p.tabelaPaginas.print_estado()
-
-    print("="*40 + "\n")
+    print("="*50 + "\n")
 
 
 # =================================================================================
 # BLOCO PRINCIPAL (MAIN)
 # =================================================================================
 
-# Ler arquivo de comandos
-try:
-    with open("caso_de_teste.txt", "r", encoding="utf-8") as f:
-        seqComandos = f.read().strip().split("\n")
-        seqComandos = [tuple(c.split(" ")) for c in seqComandos]
-except FileNotFoundError:
-    print("Erro: Arquivo 'caso_de_teste.txt' não encontrado.")
-    exit()
-
-# Inicializar componentes do sistema
-mp = MemoriaPrincipal()
-tlb = TLB()
-processosLista = []
-ciclo = 0
-
-# Loop principal da simulação
-for comando in seqComandos:
-    ciclo += 1
-    print(f"--- Ciclo {ciclo}: Executando Comando: {' '.join(comando)} ---")
-
-    idProcesso = int(comando[0][1:])
-    tipoComando = comando[1]
+def executar_simulacao(caminho_arquivo_teste): 
+    try:
+        with open(caminho_arquivo_teste, "r", encoding="utf-8") as f: 
+            seqComandos = [tuple(line.strip().split()) for line in f if line.strip()]
+    except FileNotFoundError:
+        print(f"Erro: Arquivo de teste '{caminho_arquivo_teste}' não encontrado.") 
+        return
     
-    processo_atual = next((p for p in processosLista if p.id == idProcesso), None)
+    except Exception as e:
+        print(f"Ocorreu um erro ao ler o arquivo de teste: {e}")
+        return
 
-    match tipoComando:
-        case "C":
-            if processo_atual:
-                print(f"Erro: Processo P{idProcesso} já existe.")
-                continue
+    mp = MemoriaPrincipal()
+    tlb = TLB()
+    processosLista = []
+    ciclo = 0
 
-            tamanho, unidade = comando[2].split()
-            tamanho = int(tamanho)
-            
-            # Converter tamanho para bytes com base na unidade
-            if unidade == "KB":
-                tamProcesso = tamanho * 1024
-            elif unidade == "MB":
-                tamProcesso = tamanho * 1024 * 1024
-            elif unidade == "GB":
-                tamProcesso = tamanho * 1024 * 1024 * 1024
-            else:
-                print(f"Erro: Unidade '{unidade}' inválida para tamanho do processo.")
-                continue
+    print("="*50)
+    print("CONFIGURAÇÕES DA SIMULAÇÃO CARREGADAS")
+    print("="*50)
+    print(f"  - Arquivo de Teste: {caminho_arquivo_teste}")
+    print(f"  - Tamanho da Memória Principal: {TAM_MEM_PRINCIPAL} {UNID_MEMP}")
+    print(f"  - Tamanho da Página/Quadro: {TAM_PAGINA} {UNID_PAG}")
+    print(f"  - Número de Linhas da TLB: {NUM_LINHAS_TLB}")
+    politica = "LRU (Least Recently Used)" if POLITICA_SUB == 0 else "Relógio"
+    print(f"  - Política de Substituição: {politica}")
+    print("="*50 + "\n")
+
+    print("--- INICIANDO SIMULAÇÃO ---")
+    for comando in seqComandos:
+        ciclo += 1
+        print(f"--- Ciclo {ciclo}: Executando Comando: {' '.join(comando)} ---")
+
+        idProcesso = int(comando[0][1:])
+        tipoComando = comando[1].upper()
+        
+        processo_atual = next((p for p in processosLista if p.id == idProcesso), None)
+
+        if not processo_atual and tipoComando != "C":
+            print(f"Erro: Tentando operar no processo P{idProcesso} que não existe.")
+            continue
+
+        if tipoComando == "C":
+            tamanho, unidade = int(comando[2]), comando[3]
+            if unidade == "KB": tamProcesso = tamanho * 1024
+            elif unidade == "MB": tamProcesso = tamanho * 1024 * 1024
+            else: tamProcesso = tamanho * 1024 * 1024 * 1024
             
             novo_processo = Processo(idProcesso, tamProcesso)
             processosLista.append(novo_processo)
             print(f"P{idProcesso}: Processo criado com tamanho {tamProcesso} bytes.")
-            
-            # Alocar páginas iniciais na memória
-            mp.carregaProcesso(novo_processo)
-            novo_processo.estado = "P" # Pronto
+            novo_processo.estado = "P"
 
-        case "R" | "P" | "W":
-            if not processo_atual:
-                print(f"Erro: Tentando acessar processo P{idProcesso} que não existe.")
-                continue
+        elif tipoComando in ["R", "P", "W"]:
+            match = re.search(r'\((\d+)\)', comando[2])
+            if match:
+                endereco_virtual = int(match.group(1))
+            else:
+                try:
+                    endereco_virtual = int(comando[2])
+                except ValueError:
+                    print(f"Erro: Formato de endereço inválido no comando: {' '.join(comando)}")
+                    continue
             
-            endereco_virtual = int(comando[2])
-            tratar_acesso_memoria(processo_atual, endereco_virtual, tlb, mp, tipoComando)
+            tratar_acesso_memoria(processo_atual, endereco_virtual, tlb, mp, tipoComando, processosLista)
 
-        case "I":
-            if not processo_atual:
-                print(f"Erro: Tentando I/O no processo P{idProcesso} que não existe.")
-                continue
-            
+        elif tipoComando == "I":
             print(f"P{idProcesso}: Instrução de I/O. Processo movido para Bloqueado.")
             processo_atual.estado = "B"
 
-        case "T":
-            if not processo_atual:
-                print(f"Erro: Tentando terminar processo P{idProcesso} que não existe.")
-                continue
-            
-            print(f"P{idProcesso}: Processo finalizado. Liberando recursos...")
+        elif tipoComando == "T":
+            print(f"P{idProcesso}: Processo finalizado.")
             processo_atual.estado = "F"
-            # TODO: Implementar a lógica de liberação de quadros na MemoriaPrincipal
-            # mp.libera_processo(processo_atual)
+            tlb.invalidar_processo(idProcesso)
+            processosLista.remove(processo_atual)
             
-            
-            tlb.invalidar()
-            
-    # Imprimir o estado do sistema ao final de cada ciclo
-    print_estado_sistema(mp, tlb, processosLista)
+        print_estado_sistema(mp, tlb, processosLista)
 
-print("--- Simulação Finalizada ---")
+    print("\n--- Simulação Finalizada ---")

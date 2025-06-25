@@ -32,7 +32,7 @@ class TabelaPaginas:
         self.idProcesso = idProcesso
         self.quantidadeEntradas = quantidadePaginas
         self.entradas = [EntradaTP(idProcesso, i) for i in range(self.quantidadeEntradas)]
-    
+
     def traduzirEndereco(self, enderecoVirtual, tlb=None):
         """
         Traduz um endereço virtual para físico usando a TLB (se disponível) e a tabela de páginas.
@@ -52,13 +52,14 @@ class TabelaPaginas:
         
         # Verifica se o VPN é válido
         if numeroPaginaVirtual >= self.quantidadeEntradas:
-            raise ValueError(f"VPN {numeroPaginaVirtual} fora dos limites da tabela de páginas")
+            raise ValueError(f"VPN {numeroPaginaVirtual} fora dos limites da tabela de páginas para o Processo {self.idProcesso}")
         
         # Se a TLB estiver disponível, tenta usar ela primeiro        
-        numeroFrameFisico = tlb.buscar(self.idProcesso, numeroPaginaVirtual)
-        if numeroFrameFisico is not None:
-            # TLB hit - retorna o endereço físico
-            return (numeroFrameFisico * TAMANHO_PAGINA + offset, False)
+        if tlb:
+            numeroFrameFisico = tlb.buscar(self.idProcesso, numeroPaginaVirtual)
+            if numeroFrameFisico is not None:
+                # TLB hit - retorna o endereço físico
+                return (numeroFrameFisico * TAMANHO_PAGINA + offset, False)
 
         # TLB miss - consulta a tabela de páginas
         entrada = self.entradas[numeroPaginaVirtual]
@@ -69,8 +70,7 @@ class TabelaPaginas:
         # Página encontrada na tabela de páginas
         numeroFrameFisico = entrada.enderecoMemoriaPrincipal
         
-        # Atualiza TLB ou insere nova entrada
-        tlb.inserir(entrada.idProcesso, numeroPaginaVirtual, numeroFrameFisico)
+        # Se houve TLB miss mas a página está na memória, o main irá inserir na TLB.
         
         # Retorna o endereço físico
         return (numeroFrameFisico * TAMANHO_PAGINA + offset, False)

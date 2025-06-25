@@ -5,7 +5,6 @@ from PIL import Image, ImageTk
 class Tela_Inicial(t.Frame):
 
     def __init__(self,parent_frame,controller):
-
         super().__init__(parent_frame)
         self.controller = controller
 
@@ -13,38 +12,23 @@ class Tela_Inicial(t.Frame):
         style.configure("Custom.TFrame", background="white")
         self.configure(background= '#181f30') 
 
-        # Configuração das linhas e colunas do frame principal (Tela_Inicial)
-        # O canvas/label da imagem vai usar estas configurações para preencher
         for col in range(5):
             self.columnconfigure(col, weight=1)
         for row in range(3):
             self.rowconfigure(row, weight=1)
 
-        # --- IMAGEM DE FUNDO FIXA QUE PREENCHE O FRAME ---
-        self.background_image_tk = None 
+        # --- IMAGEM DE FUNDO ---
         try:
             imagem_fundo_pil = Image.open("Interface/Imagens/Página_Inicial_UI.png")
             self.background_image_tk = ImageTk.PhotoImage(imagem_fundo_pil)
-
-            # Criar um Label para exibir a imagem
             self.label_background = t.Label(self, image=self.background_image_tk, bg='#181f30')
-            self.label_background.image = self.background_image_tk # Manter a referência
-            
-            # Posicionar o Label da imagem para preencher o Tela_Inicial frame
-            # Ele estará na camada de baixo
+            self.label_background.image = self.background_image_tk
             self.label_background.grid(row=0, column=0, rowspan=3, columnspan=5, sticky="nsew")
-            self.label_background.lower() # Garante que fique no fundo, abaixo de outros widgets
-
-
+            self.label_background.lower()
         except FileNotFoundError:
-            print("Erro: Imagem 'Página Inicial UI.png' não encontrada.")
-            # Se a imagem não for encontrada, exibe um Label de erro centralizado
-            t.Label(self, text="Imagem não encontrada!", fg="red", bg="white").grid(row=0, column=0, rowspan=3, columnspan=5, sticky="nsew")
+            t.Label(self, text="Imagem 'Página Inicial UI.png' não encontrada.", fg="red", bg="white").grid(row=0, column=0, rowspan=3, columnspan=5, sticky="nsew")
 
-
-        # --- RESTANTE DOS SEUS WIDGETS (EXATAMENTE COMO ESTAVAM) ---
-        # O auxiliar_botao e o botão dentro dele manterão seu posicionamento original
-        # mas agora aparecerão acima do label_background
+    
         auxiliar_botao = ttk.Frame(self, style= "Custom.TFrame")
         auxiliar_botao.grid(column= 1, row= 1, columnspan=5, sticky= "w")
 
@@ -56,18 +40,17 @@ class Tela_Inicial(t.Frame):
         auxiliar_botao.columnconfigure(2, weight=0)
         auxiliar_botao.columnconfigure(3, weight=0)
         auxiliar_botao.columnconfigure(4, weight=0)
-
-
-        # Inserção de Botão
+        
         t.Button(
             auxiliar_botao,
-            text="Configurar o Gerenciador",
+            text="Iniciar Simulação", 
             height=2,
             width=30,
             fg="#FFFFFF",
             bg="#0C0E8B",
             font=("monospace", 12, "bold"),
-            command=lambda: self.controller.show_page("ui_pagina_configurar.py"),
-            activebackground="#393CD1", # Cor de fundo ao clicar (um azul um pouco mais escuro)
-            activeforeground="#FFFFFF", # Cor do texto ao clicar (um cinza claro)
-        ).grid(column=0, row=0, sticky="ew", padx=5)
+
+            command=lambda: self.controller.show_page("ui_pagina_input.py"),
+            activebackground="#393CD1",
+            activeforeground="#FFFFFF",
+        ).pack(padx=20, pady=20)
