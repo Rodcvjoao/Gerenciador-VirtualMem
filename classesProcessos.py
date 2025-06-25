@@ -1,5 +1,5 @@
 import math
-from config import TAMANHO_PAGINA
+from config import TAMANHO_PAGINA_QUADRO
 
 # TODO: Definir uma forma de escolher o tamanho da página 
 # (O ideal é que possa ser facilmente trocada a cada execução) (Passar como input?)
@@ -21,7 +21,7 @@ class Processo:
         self.tamanho = tamanho
         # Queremos sempre arredondar o número de páginas para cima
         # no comum caso de um valor não divisível de páginas
-        self.quantidadePaginas = math.ceil(self.tamanho/TAMANHO_PAGINA)
+        self.quantidadePaginas = math.ceil(self.tamanho/TAMANHO_PAGINA_QUADRO)
         self.tabelaPaginas = TabelaPaginas(self.quantidadePaginas, id)
 
 
@@ -47,8 +47,8 @@ class TabelaPaginas:
                 - page_fault é True se ocorreu page fault, False caso contrário
         """
         # Calcula o número da página virtual e o offset
-        numeroPaginaVirtual = enderecoVirtual // TAMANHO_PAGINA
-        offset = enderecoVirtual % TAMANHO_PAGINA
+        numeroPaginaVirtual = enderecoVirtual // TAMANHO_PAGINA_QUADRO
+        offset = enderecoVirtual % TAMANHO_PAGINA_QUADRO
         
         # Verifica se o VPN é válido
         if numeroPaginaVirtual >= self.quantidadeEntradas:
@@ -59,7 +59,7 @@ class TabelaPaginas:
             numeroFrameFisico = tlb.buscar(self.idProcesso, numeroPaginaVirtual)
             if numeroFrameFisico is not None:
                 # TLB hit - retorna o endereço físico
-                return (numeroFrameFisico * TAMANHO_PAGINA + offset, False)
+                return (numeroFrameFisico * TAMANHO_PAGINA_QUADRO + offset, False)
 
         # TLB miss - consulta a tabela de páginas
         entrada = self.entradas[numeroPaginaVirtual]
@@ -73,7 +73,7 @@ class TabelaPaginas:
         # Se houve TLB miss mas a página está na memória, o main irá inserir na TLB.
         
         # Retorna o endereço físico
-        return (numeroFrameFisico * TAMANHO_PAGINA + offset, False)
+        return (numeroFrameFisico * TAMANHO_PAGINA_QUADRO + offset, False)
 
 class EntradaTP:
     def __init__(self, idProcesso, idEntrada):
@@ -95,6 +95,6 @@ class Pagina:
         # Ainda pensando se idPagina pode ser utilizado em algum momento, deixar aqui...
         self.idPagina = idPagina
 
-        self.dados = bytearray(TAMANHO_PAGINA)  # Dados da página
+        self.dados = bytearray(TAMANHO_PAGINA_QUADRO)  # Dados da página
         self.referenciada = False  # Bit de referência para algoritmos de substituição
         self.modificada = False  # Bit de modificação

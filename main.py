@@ -9,7 +9,7 @@ def tratar_acesso_memoria(processo, endereco_virtual, tlb, mp, tipo_acesso, proc
     print(f"\n[Acesso] P{processo.id}: Tentando acesso '{tipo_acesso}' ao endereço virtual {endereco_virtual}")
     processo.estado = "E"
 
-    numero_pagina_virtual = endereco_virtual // TAMANHO_PAGINA
+    numero_pagina_virtual = endereco_virtual // TAMANHO_PAGINA_QUADRO
     
     if numero_pagina_virtual >= processo.quantidadePaginas:
         print(f"!!! ERRO DE SEGMENTAÇÃO !!!: Endereço {endereco_virtual} está fora do espaço de endereçamento do P{processo.id}.")
@@ -86,9 +86,9 @@ def executar_simulacao(caminho_arquivo_teste):
     print("CONFIGURAÇÕES DA SIMULAÇÃO CARREGADAS")
     print("="*50)
     print(f"  - Arquivo de Teste: {caminho_arquivo_teste}")
-    print(f"  - Tamanho da Memória Principal: {TAM_MEM_PRINCIPAL} {UNID_MEMP}")
-    print(f"  - Tamanho da Página/Quadro: {TAM_PAGINA} {UNID_PAG}")
-    print(f"  - Número de Linhas da TLB: {NUM_LINHAS_TLB}")
+    print(f"  - Tamanho da Memória Principal: {TAMANHO_MEMORIA_P} {UNID_MEMP}")
+    print(f"  - Tamanho da Página/Quadro: {TAMANHO_PAGINA_QUADRO} {UNID_PAG_QUAD}")
+    print(f"  - Número de Linhas da TLB: {NUMERO_LINHAS_TLB}")
     politica = "LRU (Least Recently Used)" if POLITICA_SUB == 0 else "Relógio"
     print(f"  - Política de Substituição: {politica}")
     print("="*50 + "\n")

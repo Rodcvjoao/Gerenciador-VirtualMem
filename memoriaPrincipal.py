@@ -10,9 +10,9 @@ IMPORTANTE:
 
 class MemoriaPrincipal:
     # Por padrão, passaremos um valor base como o tamanho da memória principal
-    def __init__(self, tamanho=TAMANHO_MEMORIA):
+    def __init__(self, tamanho=TAMANHO_MEMORIA_P):
         self.tamanho = tamanho
-        self.quantidadeQuadros = tamanho//TAMANHO_PAGINA
+        self.quantidadeQuadros = tamanho//TAMANHO_PAGINA_QUADRO
         self.quadros = [Quadro(i) for i in range(self.quantidadeQuadros)]
 
         # Faremos uma lista com todos os quadros que foram referenciados,
@@ -88,6 +88,6 @@ class MemoriaPrincipal:
 class Quadro:
     def __init__(self, indiceQuadro):
         self.idQuadro = indiceQuadro
-        self.enderecoFisico = TAMANHO_PAGINA * indiceQuadro
+        self.enderecoFisico = TAMANHO_PAGINA_QUADRO * indiceQuadro
         self.pagina = None
         self.bitUtilizado = False

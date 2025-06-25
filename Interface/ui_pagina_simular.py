@@ -5,7 +5,7 @@ class Tela_Simular:
     def __init__(self, root):
         self.root = root
         self.root.title("Simulador de Gerenciamento de Memória")
-        self.root.geometry("1200x800")
+        self.root.geometry("800x800")
         self.root.configure(bg='#f0f0f0')
         
         # Dados da simulação
@@ -238,22 +238,6 @@ class Tela_Simular:
         self.tree_ms.pack(side='left', fill='both', expand=True, padx=(5, 0), pady=5)
         scrollbar_ms.pack(side='right', fill='y', pady=5)
     
-    def carregar_arquivo(self):
-        """Carrega arquivo de comandos"""
-        arquivo = filedialog.askopenfilename(
-            title="Selecionar arquivo de comandos",
-            filetypes=[("Arquivos de texto", "*.txt"), ("Todos os arquivos", "*.*")]
-        )
-        
-        if arquivo:
-            try:
-                with open(arquivo, 'r', encoding='utf-8') as f:
-                    self.comandos = [linha.strip() for linha in f.readlines() if linha.strip()]
-                messagebox.showinfo("Sucesso", f"Arquivo carregado com {len(self.comandos)} comandos!")
-                self.ciclo_atual = 0
-                self.atualizar_interface()
-            except Exception as e:
-                messagebox.showerror("Erro", f"Erro ao carregar arquivo: {str(e)}")
     
     def voltar_ciclo(self):
         """Volta para o ciclo anterior"""
