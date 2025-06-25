@@ -1,23 +1,26 @@
+import copy
+
 class MemoriaSecundaria:
     def __init__(self, tamanho):
         self.swaps = {}
         self.tamanho = tamanho
 
-# FIXME: REVER ESSA IMPLEMENTAÇÃO
-'''
-    def swap(self, pagina):
-        self.paginasSuspensas.append(pagina)
 
-    def swapProcesso(self, processo, memoriaPrincipal):
-        processo.estado = "BS"
-        # Adiciona as páginas do processo na memória secundária
+    def swapPagina(self, pagina, processo):
+        if self.swaps.get(processo.id) == None:
+            self.swaps[processo.id] = Swap(processo)
+        
+        paginasSuspensas = self.swaps[pagina.idProcesso].paginasSuspensas
+        if pagina.idPagina not in paginasSuspensas:
+            paginasSuspensas[pagina.idPagina] = copy.copy(pagina)
+            
+
+    def swapProcesso(self, processo):
+        if self.swaps.get(processo.id) == None:
+            self.swaps[processo.id] = Swap(processo)
+
         for entrada in processo.tabelaPaginas.entradas:
-            self.swap(entrada.pagina)
-
-            endMP = entrada.enderecoMemoriaPrincipal
-
-            memoriaPrincipal.quadros[endMP].pagina = None
-'''
+            self.swapPagina(entrada.pagina, processo)
             
 class Swap:
     def __init__(self, processo):
@@ -27,4 +30,4 @@ class Swap:
 
         listaEntradas = processo.tabelaPaginas.entradas
         for i in range(len(listaEntradas)):
-            self.paginasSuspensas[f"Página-{listaEntradas[i].idEntrada}"] = None
+            self.paginasSuspensas[listaEntradas[i].idEntrada] = None

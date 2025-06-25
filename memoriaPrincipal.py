@@ -23,6 +23,26 @@ class MemoriaPrincipal:
         self.quadrosRefsLRU = []
         self.nextFrameRelogio = 0
 
+    # Usaremos essa função apenas na primeira vez que trouxermos o processo pra MP
+    # A função TENTA alocar quadros da MP para o processo e troca o estado do processo para pronto caso consiga
+    def carregaProcesso(self, processo):
+        entradasVazias = [e for e in processo.tabelaPagina.entradas if not e.bitPresenca]
+        indiceEV = 0
+        i = 0
+        while i < self.quantidadeQuadros and indiceEV < len(entradasVazias):
+            if self.quadros[i].pagina == None:
+                self.quadros[i].pagina = entradasVazias[indiceEV].pagina
+                self.quadros[i].bitUtilizado = True
+                self.quadrosRefsLRU.append(self.quadros[i])
+                
+                indiceEV += 1
+
+            # CHECAR SE TODAS AS PÁGINAS FORAM APROPRIADAMENTE ALOCADAS
+            # CASO CONTÁRIO, JOGAR PARA MEMÓRIA SECUNDÁRIA
+            i += 1
+        
+        processo.estado = "P" if indiceEV > 0 else processo.estado
+
     def carregaPagina(self, processo, pagina_nova):
         # Primeiro, verifica se há quadros livres
         for q in self.quadros:
@@ -51,7 +71,8 @@ class MemoriaPrincipal:
         quadroEscolhido = self.quadrosRefsLRU.pop(0)
         pagina_antiga = quadroEscolhido.pagina # Salva a referência da página antiga
 
-        memoriaSecundaria.swap(pagina_antiga)
+        # FIXME: Rever essa implementação de Swap
+        #memoriaSecundaria.swap(pagina_antiga)
 
         print(f"Substituição LRU: Sai P{pagina_antiga.idProcesso}(Página {pagina_antiga.idPagina}), Entra P{pagina_nova.idProcesso}(Página {pagina_nova.idPagina}) no Quadro {quadroEscolhido.idQuadro}")
 
