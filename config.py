@@ -1,82 +1,72 @@
 from enum import Enum
 
-# Configurações do sistema de memória virtual
-# Estas configurações podem ser modificadas diretamente neste arquivo
+
+POLITICA_SUB = 0  # 0 para LRU, 1 para Relógio
+TAM_MEM_PRINCIPAL = "128"
+UNID_MEMP = "KB - KiloBytes"
+TAM_PAGINA = "4"
+UNID_PAG = "KB - KiloBytes"
+NUM_LINHAS_TLB = "16"
+TAM_MEM_SECUNDARIA = "512"
+UNID_MEMS = "MB - MegaBytes"
+TAM_QUADRO = TAM_PAGINA
+UNID_QUAD = UNID_PAG
+TAM_END_LOGICO = "16"
+UNID_ENDLOG = "Bits"
 
 
-# Vinda das informações da interface
-TAM_MEM_PRINCIPAL = "1"
-TAM_MEM_SECUNDARIA = "1"
-TAM_PAGINA = "1"
-TAM_QUADRO = "11"
-TAM_END_LOGICO = "1"
-NUM_LINHAS_TLB = "1"
-
-# Tratamento das strings para inteiros
-TAMANHO_MEMORIA_P = int(TAM_MEM_PRINCIPAL)
-TAMANHO_MEMORIA_S = int(TAM_MEM_SECUNDARIA)
-TAMANHO_PAGINA = int(TAM_PAGINA)
-TAMANHO_QUADRO = int(TAM_QUADRO)
-TAMANHO_END_LOGICO = int(TAM_END_LOGICO)
-NUMERO_LINHAS_TLB = int(NUM_LINHAS_TLB)
 
 
-# Mapeamento de unidade para valor em bytes para centralizar a lógica
 MAPA_UNIDADES = {
     "KB - KiloBytes": 2 ** 10,
     "MB - MegaBytes": 2 ** 20
 }
-# Valor padrão caso a unidade não seja KB ou MB (assumindo GB)
-VALOR_PADRAO = 2 ** 30
+VALOR_PADRAO = 2**30
 
-# Tratamento das unidades para inteiros usando o dicionário
-UNID_MEMP = MAPA_UNIDADES.get(UNID_MEMP, VALOR_PADRAO)
-UNID_MEMS = MAPA_UNIDADES.get(UNID_MEMS, VALOR_PADRAO)
-UNID_PAG = MAPA_UNIDADES.get(UNID_PAG, VALOR_PADRAO)
-UNID_QUAD = MAPA_UNIDADES.get(UNID_QUAD, VALOR_PADRAO)
-UNID_ENDLOG = MAPA_UNIDADES.get(UNID_ENDLOG, VALOR_PADRAO)
-
-
-# Pegando o nome do arquivo teste
-ARQ_TESTE = "aaaa.py"
-
-
-# Define a política a ser usada na substituição de quadros na MP
-# POLITICA_SUB = 0 -> LRU
-# POLITICA_SUB = 1 -> RELÓGIO DE UM BIT
-POLITICA_SUB = 0
+try:
+    fator_mp = MAPA_UNIDADES.get(UNID_MEMP, VALOR_PADRAO)
+    fator_pag = MAPA_UNIDADES.get(UNID_PAG, VALOR_PADRAO)
+    
+    TAMANHO_MEMORIA = int(TAM_MEM_PRINCIPAL) * fator_mp
+    TAMANHO_PAGINA = int(TAM_PAGINA) * fator_pag
+    TAMANHO_TLB = int(NUM_LINHAS_TLB)
+except (ValueError, NameError) as e:
+    print(f"Erro no config.py: {e}. Usando valores de fallback.")
+    TAMANHO_MEMORIA = 128 * 1024
+    TAMANHO_PAGINA = 4 * 1024
+    TAMANHO_TLB = 16
 
 class PoliticaSub(Enum):
     LRU = 0
     Relogio = 1
 
-# Função para verificar se um número é potência de 2
 def ehPotenciaDeDois(n):
-    
-    if n <= 0:
-        return False
+    if n <= 0: return False
     return (n & (n - 1)) == 0
 
-# Função para validar as configurações
 def validarConfiguracoes():
     """
     Valida se as configurações estão em valores razoáveis.
     Retorna True se tudo estiver ok, False caso contrário.
     """
-    if NUMERO_LINHAS_TLB <= 0:
-        print("ERRO: NUMERO_LINHAS_TLB deve ser maior que zero")
+    # Usa a variável numérica TAMANHO_TLB para a verificação
+    if TAMANHO_TLB <= 0:
+        # A mensagem de erro refere-se à variável original do config
+        print(f"ERRO: NUM_LINHAS_TLB ({NUM_LINHAS_TLB}) deve ser maior que zero.")
         return False
     
-    if TAMANHO_PAGINA <= 0 or not ehPotenciaDeDois(TAMANHO_PAGINA):  #Potência de 2
-        print("ERRO: TAMANHO_PAGINA deve ser maior que zero e potencia de 2.")
+    if TAMANHO_PAGINA <= 0 or not ehPotenciaDeDois(TAMANHO_PAGINA):  # Potência de 2
+        print(f"ERRO: TAM_PAGINA ({TAM_PAGINA}) deve ser maior que zero e uma potência de 2.")
         return False
     
-    if TAMANHO_MEMORIA_P <= 0 or TAMANHO_MEMORIA_P < TAMANHO_PAGINA or not ehPotenciaDeDois(TAMANHO_MEMORIA_P):
-        print("ERRO: TAMANHO_MEMORIA_P deve ser maior que zero, maior que TAMANHO_PAGINA e potência de 2.")
+    # Usa a variável numérica TAMANHO_MEMORIA para a verificação
+    if TAMANHO_MEMORIA <= 0 or TAMANHO_MEMORIA < TAMANHO_PAGINA or not ehPotenciaDeDois(TAMANHO_MEMORIA):
+        # A mensagem de erro refere-se à variável original do config
+        print(f"ERRO: TAM_MEM_PRINCIPAL ({TAM_MEM_PRINCIPAL}) resulta em um tamanho de memória inválido. Deve ser maior que zero, maior que o tamanho da página e uma potência de 2.")
         return False
     
     return True
 
 # Valida as configurações ao importar o módulo
 if not validarConfiguracoes():
-    raise ValueError("Configurações inválidas. Verifique o arquivo config.py") 
+    raise ValueError("Configurações inválidas. Verifique o arquivo config.py")

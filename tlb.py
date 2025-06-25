@@ -3,64 +3,64 @@ from config import TAMANHO_TLB
 
 class EntradaTLB:
     def __init__(self, numeroPaginaVirtual, numeroFrameFisico, idProcesso):
-        self.numeroPaginaVirtual = numeroPaginaVirtual  # Número da Página Virtual
-        self.numeroFrameFisico = numeroFrameFisico  # Número do Frame Físico
-        self.idProcesso = idProcesso  # ID do Processo
+        self.numeroPaginaVirtual = numeroPaginaVirtual
+        self.numeroFrameFisico = numeroFrameFisico
+        self.idProcesso = idProcesso
         self.valido = True
 
 class TLB:
     def __init__(self, tamanho=None):
-        # Usa o tamanho do arquivo de configuração se não for especificado
         self.tamanho = tamanho if tamanho is not None else TAMANHO_TLB
-        # Usando OrderedDict para implementar a política de substituição LRU
-        # O parâmetro tamanho determina quantas entradas a TLB pode armazenar
-        self.entradas = OrderedDict()  # Chave: (idProcesso, numeroPaginaVirtual), Valor: EntradaTLB
+        self.entradas = OrderedDict()
         self.acertos = 0
         self.falhas = 0
 
     def buscar(self, idProcesso, numeroPaginaVirtual):
-        """
-        Procura um número de página virtual na TLB.
-        Retorna o número do frame físico se encontrado, None caso contrário.
-        """
         chave = (idProcesso, numeroPaginaVirtual)
         if chave in self.entradas:
-            # Move a entrada para o final (mais recentemente usada)
-            entrada = self.entradas.pop(chave)
-            self.entradas[chave] = entrada
+            self.entradas.move_to_end(chave) # LRU: Mover para o fim (mais recente)
             self.acertos += 1
-            return entrada.numeroFrameFisico
+            return self.entradas[chave].numeroFrameFisico
         self.falhas += 1
         return None
 
     def inserir(self, idProcesso, numeroPaginaVirtual, numeroFrameFisico):
-        """
-        Insere uma nova tradução na TLB.
-        Se a TLB estiver cheia, a entrada menos recentemente usada é removida.
-        """
         chave = (idProcesso, numeroPaginaVirtual)
-        # Se a entrada já existe, atualiza ela
         if chave in self.entradas:
             self.entradas.pop(chave)
+        elif len(self.entradas) >= self.tamanho:
+            self.entradas.popitem(last=False)
         
-        # Se a TLB estiver cheia, remove a entrada menos recentemente usada
-        if len(self.entradas) >= self.tamanho:
-            self.entradas.popitem(last=False)  # Remove o primeiro item (mais antigo)
-        
-        # Adiciona a nova entrada
         self.entradas[chave] = EntradaTLB(numeroPaginaVirtual, numeroFrameFisico, idProcesso)
 
-    def invalidar(self):
-        """
-        Invalida entradas da TLB.
-        """
+    def invalidar_tudo(self):
+        """Invalida todas as entradas da TLB, limpando completamente a estrutura."""
         self.entradas.clear()
-        
+        print("TLB: Todas as entradas foram invalidadas!")
+
+   
+    def invalidar_entrada(self, idProcesso, numeroPaginaVirtual):
+        """
+        Invalida uma entrada específica da TLB (usado em substituição de página).
+        """
+        chave = (idProcesso, numeroPaginaVirtual)
+        if chave in self.entradas:
+            del self.entradas[chave]
+
+    def invalidar_processo(self, idProcesso):
+        """
+        Invalida todas as entradas de um processo específico (usado ao terminar um processo).
+        """
+        # Cria uma lista de chaves para remover para não modificar o dicionário enquanto itera
+        chaves_para_remover = [k for k in self.entradas if k[0] == idProcesso]
+        for chave in chaves_para_remover:
+            del self.entradas[chave]
+            print(f"TLB: Entrada {chave} invalidada.")
+
+    
+
 
     def obterEstatisticas(self):
-        """
-        Retorna estatísticas de acertos e falhas da TLB.
-        """
         total = self.acertos + self.falhas
         taxaAcertos = (self.acertos / total * 100) if total > 0 else 0
         return {
@@ -69,17 +69,15 @@ class TLB:
             'total': total,
             'taxaAcertos': taxaAcertos
         }
-    
 
     def print_estado(self):
         print("\n--- Estado da TLB ---")
         if not self.entradas:
             print("  TLB está vazia.")
         else:
-            print("  [ID Processo, VPN] -> PFN")
+            print("  [ID Proc, VPN] -> PFN")
             for (idProc, vpn), entrada in self.entradas.items():
                 print(f"  [{idProc}, {vpn}] -> {entrada.numeroFrameFisico}")
         
-        # Imprime as estatísticas
         stats = self.obterEstatisticas()
         print(f"  Estatísticas: {stats['acertos']} acertos, {stats['falhas']} falhas | Taxa de Acerto: {stats['taxaAcertos']:.2f}%")
