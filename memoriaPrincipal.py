@@ -85,7 +85,7 @@ class MemoriaPrincipal:
 
         return quadroEscolhido, pagina_antiga # Retorna o quadro e a página que foi removida
 
-    def substituicaoRelogio(self, pagina_nova):
+    def substituicaoRelogio(self, pagina_nova, memoriaSecundaria):
         while True:
             quadroAtual = self.quadros[self.nextFrameRelogio % self.quantidadeQuadros]
             
