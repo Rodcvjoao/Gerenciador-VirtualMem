@@ -1,21 +1,18 @@
-
 import tkinter as t
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk
 from PIL import Image, ImageTk
-
 import re
 
 class Tela_Input(t.Frame):
 
     def __init__(self,parent_frame,controller):
+
         super().__init__(parent_frame)
         self.controller = controller
-        self.configure(background='#181f30')
-        self.grid_columnconfigure(0, weight=1)
 
         style = ttk.Style()
         style.configure("Custom.TFrame", background="white")
-        self.configure(background= '#181f30')
+        self.configure(background= '#181f30') 
 
         for col in range(5):
             self.columnconfigure(col, weight=1)
@@ -23,7 +20,7 @@ class Tela_Input(t.Frame):
             self.rowconfigure(row, weight=1)
 
         # --- IMAGEM DE FUNDO FIXA QUE PREENCHE O FRAME ---
-        self.background_image_tk = None
+        self.background_image_tk = None 
         try:
             imagem_fundo_pil = Image.open("Interface/Imagens/Página_Input_UI.png")
             self.background_image_tk = ImageTk.PhotoImage(imagem_fundo_pil)
@@ -31,25 +28,30 @@ class Tela_Input(t.Frame):
             # Criar um Label para exibir a imagem
             self.label_background = t.Label(self, image=self.background_image_tk, bg='#181f30')
             self.label_background.image = self.background_image_tk # Manter a referência
-
+            
             # Posicionar o Label da imagem para preencher o Tela_Inicial frame
             # Ele estará na camada de baixo
             self.label_background.grid(row=0, column=0, rowspan=3, columnspan=5, sticky="nsew")
             self.label_background.lower() # Garante que fique no fundo, abaixo de outros widgets
 
+
         except FileNotFoundError:
-            # Em caso de erro, um label simples para não quebrar o layout
-            t.Label(self, text="Imagem de fundo não encontrada", fg="red", bg="#181f30").grid(row=0, column=0)
+            print("Erro: Imagem 'Página Input UI.png' não encontrada.")
+            # Se a imagem não for encontrada, exibe um Label de erro centralizado
+            t.Label(self, text="Imagem não encontrada!", fg="red", bg="white").grid(row=0, column=0, rowspan=3, columnspan=5, sticky="nsew")
 
 
-        content_frame = t.Frame(self, bg="white", padx=20, pady=20, relief="groove", borderwidth=2)
-        content_frame.grid(row=1, column=0, sticky="") # sticky="" centraliza
+        # --- RESTANTE DOS SEUS WIDGETS (EXATAMENTE COMO ESTAVAM) ---
+        # O auxiliar_botao e o botão dentro dele manterão seu posicionamento original
+        # mas agora aparecerão acima do label_background
+        auxiliar_botao = ttk.Frame(self, style= "Custom.TFrame")
+        auxiliar_botao.grid(column= 3, row= 2, columnspan=5, sticky= "w")
 
         for col in range(5):
             auxiliar_botao.columnconfigure(col, weight=0)
-
+        
         for lin in range(5):
-            auxiliar_botao.rowconfigure(lin, weight=0)
+            auxiliar_botao.rowconfigure(row, weight=0)
 
         m = t.Frame(self)
         m.place(x= 210, y= 240)
@@ -57,18 +59,16 @@ class Tela_Input(t.Frame):
         for col in range(10):
             m.columnconfigure(col, weight=0)
         # Ajuste o range de linhas conforme necessário para o layout
-        for lin in range(10): # Você pode ajustar para mais se precisar de mais linhas, mantido para evitar alterações no layout
+        for lin in range(10): # Você pode ajustar para mais se precisar de mais linhas
             m.rowconfigure(lin, weight=0)
 
         self.entrada = t.StringVar()
         self.entrada_entry = t.Entry(m, width=40, textvariable=self.entrada)
         self.entrada_entry.grid(row=3, column = 4,sticky=(t.W,t.E))
-        # REMOVA OU COMENTE ESTA LINHA:
-        # t.Label(m, bg='#FFFFFF').grid(row=3, column=4, sticky=(t.W, t.E))
-        # Se você quiser um label PARA o Entry, posicione-o em uma célula diferente ou adicione um texto.
-        # Ex: t.Label(m, text="Caminho do Arquivo:", bg='#FFFFFF').grid(row=2, column=4, sticky=t.W) # Em outra linha/coluna
+        t.Label(m, bg= '#FFFFFF').place(x= 210, y= 240)
 
 
+        # Inserção de Botão Enviar
         t.Button(
             auxiliar_botao,
             text="Enviar",
@@ -78,7 +78,7 @@ class Tela_Input(t.Frame):
             bg="#1ECC6F",
             font=("monospace", 12, "bold"),
             command= self.salvar_config,
-            activebackground="#696969", #
+            activebackground="#696969", # 
             activeforeground="#FFFFFF", # Cor do texto ao clicar (um cinza claro)
         ).grid(row= 2, column= 4, sticky= "ew")
 
@@ -88,12 +88,14 @@ class Tela_Input(t.Frame):
 
         for col in range(5):
             auxiliar_botao2.columnconfigure(col, weight=0)
-
+        
         for lin in range(5):
-            auxiliar_botao2.rowconfigure(lin, weight=0)
+            auxiliar_botao2.rowconfigure(row, weight=0)
 
+
+        # Inserção de Botão Voltar
         t.Button(
-            botoes_frame,
+            auxiliar_botao2,
             text="Voltar",
             height=2,
             width=20,
@@ -106,40 +108,10 @@ class Tela_Input(t.Frame):
         ).grid(row= 0, column= 1, sticky= "ew")
 
     def salvar_config(self):
-        # O caminho do arquivo de teste não precisa ser uma potência de 2
-        # Ele só precisa ser um caminho válido.
-        caminho = self.entrada_entry.get()
 
-        if not caminho: # Validação simples: o campo não pode estar vazio
-            t.messagebox.showerror("Erro de Entrada", "O campo de caminho do arquivo não pode estar vazio.")
-            return
-
-        # Chamamos pegar_arquivo_teste apenas se a validação passar
-        self.pegar_arquivo_teste()
-        t.messagebox.showinfo("Sucesso", "Caminho do arquivo salvo com sucesso!")
-        self.controller.show_page("ui_pagina_simular.py")
-
-        t.Button(
-            botoes_frame,
-            text="Simular",
-            height=2, width=15, fg="#FFFFFF", bg="#1ECC6F", font=("monospace", 11, "bold"),
-            command=self.salvar_e_simular,
-        ).pack(side=t.LEFT, padx=20)
-
-
-    def procurar_arquivo(self):
-        caminho = filedialog.askopenfilename(
-            title="Selecione o arquivo de teste",
-            filetypes=(("Arquivos de Texto", "*.txt"), ("Todos os arquivos", "*.*"))
-        )
-        if caminho:
-            self.entrada.set(caminho)
-
-    def salvar_e_simular(self):
-        caminho = self.entrada.get()
-        if not caminho:
-            messagebox.showwarning("Campo Vazio", "Por favor, digite ou selecione um arquivo de teste antes de simular.")
-            return
+        self.pegar_arquivo_teste()  # Chama o método que coleta e salva as informações
+        self.controller.show_page("ui_pagina_simular.py") # Navega para a próxima página
+        
 
     def pegar_arquivo_teste(self):
 
@@ -150,18 +122,16 @@ class Tela_Input(t.Frame):
             with open("config.py", "r") as arquivo:
                 linhas = arquivo.readlines()
         except FileNotFoundError:
-            print("Erro: O arquivo 'config.py' não foi encontrado. Criando um novo.")
+            print("Erro: O arquivo não foi encontrado. Criando um novo.")
             linhas = [] # Começa com uma lista vazia se o arquivo não existir
-
+        
         # Lista de variáveis que queremos salvar
         novas_configs = {
-            "ARQ_TESTE": f'"{caminho}"', # Adiciona as aspas para ser uma string no config.py
+            "ARQ_TESTE": f'"{caminho}"',
         }
 
         # Atualiza ou adiciona as variáveis
         novas_linhas = []
-        chaves_encontradas = set() # Para controlar chaves já atualizadas
-
         for linha in linhas:
             atualizado = False
             for chave, valor in novas_configs.items():
@@ -169,15 +139,9 @@ class Tela_Input(t.Frame):
                 if padrao.match(linha):
                     novas_linhas.append(f"{chave} = {valor}\n")
                     atualizado = True
-                    chaves_encontradas.add(chave)
                     break
             if not atualizado:
                 novas_linhas.append(linha)
-
-        # Adiciona chaves que não existiam no arquivo
-        for chave, valor in novas_configs.items():
-            if chave not in chaves_encontradas:
-                novas_linhas.append(f"{chave} = {valor}\n")
 
 
         # Regrava o arquivo
@@ -187,4 +151,3 @@ class Tela_Input(t.Frame):
             print("Configuração salva/atualizada em: config.py")
         except IOError as e:
             print(f"Erro ao escrever no arquivo 'config.py': {e}")
-            t.messagebox.showerror("Erro de Escrita", f"Não foi possível salvar o arquivo de configuração: {e}")

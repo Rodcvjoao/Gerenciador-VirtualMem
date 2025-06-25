@@ -2,27 +2,27 @@ from enum import Enum
 
 
 POLITICA_SUB = 0  # 0 para LRU, 1 para Relógio
-TAM_MEM_PRINCIPAL = "128"
-TAM_PAGINA = "4"
-NUM_LINHAS_TLB = "16"
-TAM_MEM_SECUNDARIA = "512"
-TAM_QUADRO = TAM_PAGINA
-TAM_END_LOGICO = "16"
+TAM_MEM_PRINCIPAL = "1024"
+TAM_PAGINA = "8"
+NUM_LINHAS_TLB = "8"
+TAM_MEM_SECUNDARIA = "64"
+TAM_QUADRO = "16"
+TAM_END_LOGICO = "8"
 
 # Vinda das informações da interface
-TAM_MEM_PRINCIPAL = "8"
-TAM_MEM_SECUNDARIA = "4"
+TAM_MEM_PRINCIPAL = "1024"
+TAM_MEM_SECUNDARIA = "64"
 TAM_PAGINA = "8"
-TAM_QUADRO = "2"
-TAM_END_LOGICO = "2"
-NUM_LINHAS_TLB = "2"
+TAM_QUADRO = "16"
+TAM_END_LOGICO = "8"
+NUM_LINHAS_TLB = "8"
 
 
-UNID_MEMP = "KB"
-UNID_MEMS = "KB"
-UNID_PAG = "KB"
-UNID_QUAD = "KB"
-UNID_ENDLOG = "KB"
+UNID_MEMP = "KB - KiloBytes"
+UNID_MEMS = "KB - KiloBytes"
+UNID_PAG = "KB - KiloBytes"
+UNID_QUAD = "KB - KiloBytes"
+UNID_ENDLOG = "KB - KiloBytes"
 
 
 lista_unidade = [UNID_MEMP, UNID_MEMS, UNID_PAG, UNID_QUAD, UNID_ENDLOG]
@@ -38,7 +38,7 @@ for i in range(len(lista_unidade)):
 
 
 # Pegando o nome do arquivo teste
-ARQ_TESTE = "aleluia.py"
+ARQ_TESTE = "lalalla"
 
 
 # Define a política a ser usada na substituição de quadros na MP

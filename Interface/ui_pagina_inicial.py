@@ -43,14 +43,13 @@ class Tela_Inicial(t.Frame):
         
         t.Button(
             auxiliar_botao,
-            text="Iniciar Simulação", 
+            text="Configurar o Gerenciador", 
             height=2,
             width=30,
             fg="#FFFFFF",
             bg="#0C0E8B",
             font=("monospace", 12, "bold"),
-
-            command=lambda: self.controller.show_page("ui_pagina_input.py"),
+            command=lambda: self.controller.show_page("ui_pagina_configurar.py"),
             activebackground="#393CD1",
             activeforeground="#FFFFFF",
         ).pack(padx=20, pady=20)

@@ -1,14 +1,9 @@
 import tkinter as t
-import sys
-import os
 from pagemanager import PageManager
 from ui_pagina_inicial import Tela_Inicial
 from ui_pagina_configurar import Tela_Configurar
 from ui_pagina_input import Tela_Input
 from ui_pagina_simular import Tela_Simular
-
-# Adiciona o diretório atual ao sys.path para importar os módulos corretamente
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
 class App(t.Tk):
