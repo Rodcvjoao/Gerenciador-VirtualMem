@@ -1,16 +1,30 @@
 class MemoriaSecundaria:
     def __init__(self, tamanho):
-        self.paginasSuspensas = []
+        self.swaps = {}
         self.tamanho = tamanho
-    
+
+# FIXME: REVER ESSA IMPLEMENTAÇÃO
+'''
     def swap(self, pagina):
         self.paginasSuspensas.append(pagina)
 
-    def swapProcesso(self, processo):
+    def swapProcesso(self, processo, memoriaPrincipal):
         processo.estado = "BS"
+        # Adiciona as páginas do processo na memória secundária
         for entrada in processo.tabelaPaginas.entradas:
             self.swap(entrada.pagina)
 
-# TODO: Continuar implementação de MemoriaSecundaria
-#       Entender como write back poderia funcionar, tratando das questões
-#       de páginas em memSecundária e memPrincipal
+            endMP = entrada.enderecoMemoriaPrincipal
+
+            memoriaPrincipal.quadros[endMP].pagina = None
+'''
+            
+class Swap:
+    def __init__(self, processo):
+        self.tamanho = processo.tamanho
+        self.idProcessoSuspenso = processo.id
+        self.paginasSuspensas = {}
+
+        listaEntradas = processo.tabelaPaginas.entradas
+        for i in range(len(listaEntradas)):
+            self.paginasSuspensas[f"Página-{listaEntradas[i].idEntrada}"] = None
