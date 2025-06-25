@@ -10,7 +10,7 @@ IMPORTANTE:
 
 class MemoriaPrincipal:
     # Por padrão, passaremos um valor base como o tamanho da memória principal
-    def __init__(self, tamanho=TAMANHO_MEMORIA):
+    def __init__(self, tamanho=TAMANHO_MEMORIA_P):
         self.tamanho = tamanho
         self.quantidadeQuadros = tamanho//TAMANHO_PAGINA
         self.quadros = [Quadro(i) for i in range(self.quantidadeQuadros)]
@@ -47,9 +47,11 @@ class MemoriaPrincipal:
         
         return quadro_usado, pagina_antiga
         
-    def substituicaoLRU(self, pagina_nova):
+    def substituicaoLRU(self, pagina_nova, memoriaSecundaria):
         quadroEscolhido = self.quadrosRefsLRU.pop(0)
         pagina_antiga = quadroEscolhido.pagina # Salva a referência da página antiga
+
+        memoriaSecundaria.swap(pagina_antiga)
 
         print(f"Substituição LRU: Sai P{pagina_antiga.idProcesso}(Página {pagina_antiga.idPagina}), Entra P{pagina_nova.idProcesso}(Página {pagina_nova.idPagina}) no Quadro {quadroEscolhido.idQuadro}")
 
