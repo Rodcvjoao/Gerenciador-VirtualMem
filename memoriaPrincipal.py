@@ -10,7 +10,7 @@ IMPORTANTE:
 
 class MemoriaPrincipal:
     # Por padrão, passaremos um valor base como o tamanho da memória principal
-    def __init__(self, tamanho=TAMANHO_MEMORIA_P):
+    def __init__(self, tamanho=TAMANHO_MEMORIA):
         self.tamanho = tamanho
         self.quantidadeQuadros = tamanho//TAMANHO_PAGINA
         self.quadros = [Quadro(i) for i in range(self.quantidadeQuadros)]
@@ -22,26 +22,6 @@ class MemoriaPrincipal:
         # e uma nova página precisa ser acessada) portanto, o primeiro item da lista deve ser substituido
         self.quadrosRefsLRU = []
         self.nextFrameRelogio = 0
-
-    # Usaremos essa função apenas na primeira vez que trouxermos o processo pra MP
-    # A função TENTA alocar quadros da MP para o processo e troca o estado do processo para pronto caso consiga
-    def carregaProcesso(self, processo):
-        entradasVazias = [e for e in processo.tabelaPagina.entradas if not e.bitPresenca]
-        indiceEV = 0
-        i = 0
-        while i < self.quantidadeQuadros and indiceEV < len(entradasVazias):
-            if self.quadros[i].pagina == None:
-                self.quadros[i].pagina = entradasVazias[indiceEV].pagina
-                self.quadros[i].bitUtilizado = True
-                self.quadrosRefsLRU.append(self.quadros[i])
-                
-                indiceEV += 1
-
-            # CHECAR SE TODAS AS PÁGINAS FORAM APROPRIADAMENTE ALOCADAS
-            # CASO CONTÁRIO, JOGAR PARA MEMÓRIA SECUNDÁRIA
-            i += 1
-        
-        processo.estado = "P" if indiceEV > 0 else processo.estado
 
     def carregaPagina(self, processo, pagina_nova):
         # Primeiro, verifica se há quadros livres
@@ -67,12 +47,9 @@ class MemoriaPrincipal:
         
         return quadro_usado, pagina_antiga
         
-    def substituicaoLRU(self, pagina_nova, memoriaSecundaria):
+    def substituicaoLRU(self, pagina_nova):
         quadroEscolhido = self.quadrosRefsLRU.pop(0)
         pagina_antiga = quadroEscolhido.pagina # Salva a referência da página antiga
-
-        # FIXME: Rever essa implementação de Swap
-        #memoriaSecundaria.swap(pagina_antiga)
 
         print(f"Substituição LRU: Sai P{pagina_antiga.idProcesso}(Página {pagina_antiga.idPagina}), Entra P{pagina_nova.idProcesso}(Página {pagina_nova.idPagina}) no Quadro {quadroEscolhido.idQuadro}")
 
@@ -85,7 +62,7 @@ class MemoriaPrincipal:
 
         return quadroEscolhido, pagina_antiga # Retorna o quadro e a página que foi removida
 
-    def substituicaoRelogio(self, pagina_nova, memoriaSecundaria):
+    def substituicaoRelogio(self, pagina_nova):
         while True:
             quadroAtual = self.quadros[self.nextFrameRelogio % self.quantidadeQuadros]
             
