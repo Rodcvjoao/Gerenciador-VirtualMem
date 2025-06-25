@@ -201,9 +201,17 @@ class Tela_Configurar(t.Frame):
             return
 
         # TAMANHO_MEMORIA_P (Memória Física)
+        inf_mep = (self.combobox_unidade_memoriap.get())
+        info_memp = inf_mep[0:2]
+        inf_pag = self.combobox_unidade_pagina.get()
+        info_pag = inf_pag[0:2]
+
+        ordem = ["KB", "MB", "GB"]
+
         if valores_numericos['TAM_MEMORIA_P'] <= 0 or \
            valores_numericos['TAM_MEMORIA_P'] < valores_numericos['TAM_PAGINA_QUADRO'] or \
-           not self.ehPotenciaDeDois(valores_numericos['TAM_MEMORIA_P']):
+           not self.ehPotenciaDeDois(valores_numericos['TAM_MEMORIA_P']) or \
+           ((valores_numericos['TAM_MEMORIA_P'] >= valores_numericos['TAM_PAGINA_QUADRO']) and (ordem.index(info_memp) < ordem.index(info_pag) )):
             messagebox.showerror("Erro de Validação", "ERRO: Tamanho da Memória Física deve ser maior que zero, maior ou igual ao Tamanho da Página do Processo e potência de 2.")
             return
             

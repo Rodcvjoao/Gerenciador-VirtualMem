@@ -5,11 +5,11 @@ from enum import Enum
 
 # Vinda das informações da interface
 TAM_MEM_PRINCIPAL = "1024"
-TAM_MEM_SECUNDARIA = "64"
-TAM_PAGINA_QUADRO = "128"
+TAM_MEM_SECUNDARIA = "8"
+TAM_PAGINA_QUADRO = "1024"
 TAM_QUADRO = "2"
 TAM_END_LOGICO = "8"
-NUM_LINHAS_TLB = "64"
+NUM_LINHAS_TLB = "8"
 
 # Tratamento das strings para inteiros
 TAMANHO_MEMORIA_P = int(TAM_MEM_PRINCIPAL)
@@ -19,9 +19,9 @@ TAMANHO_QUADRO = int(TAM_QUADRO)
 TAMANHO_END_LOGICO = int(TAM_END_LOGICO)
 NUMERO_LINHAS_TLB = int(NUM_LINHAS_TLB)
 
-UNID_MEMP = "KB - KiloBytes"
+UNID_MEMP = "MB - MegaBytes"
 UNID_MEMS = "KB - KiloBytes"
-UNID_PAG_QUAD = "KB - KiloBytes"
+UNID_PAG_QUAD = "MB - MegaBytes"
 
 
 lista_unidade = [UNID_MEMP, UNID_MEMS, UNID_PAG_QUAD]
