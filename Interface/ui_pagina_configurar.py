@@ -56,37 +56,29 @@ class Tela_Configurar(t.Frame):
         self.tam_pagina = t.StringVar()
         self.tam_pagina_entry = t.Entry(mainframe, width=20, textvariable=self.tam_pagina)
         self.tam_pagina_entry.grid(column= 1, row=8, sticky=(t.W,t.E))
-        t.Label(mainframe, text="Tamanho da Página do Processo", bg= '#FFFFFF').grid(column= 1, row= 7, sticky= t.W)
-
-        self.tam_quad_mem = t.StringVar()
-        self.tam_quad_mem_entry = t.Entry(mainframe, width=20, textvariable=self.tam_quad_mem)
-        self.tam_quad_mem_entry.grid(column= 3, row=2, sticky=(t.W, t.E))
-        t.Label(mainframe, text="Tamanho do Quadro de Memória", bg= '#FFFFFF').grid(column= 3, row= 1, sticky= t.W)
+        t.Label(mainframe, text="Tamanho da Página e Quadro do Processo", bg= '#FFFFFF').grid(column= 1, row= 7, sticky= t.W)
 
         self.tam_end_log = t.StringVar()
         self.tam_end_log_entry = t.Entry(mainframe,width= 20, textvariable=self.tam_end_log)
-        self.tam_end_log_entry.grid(column= 3, row= 5, sticky=(t.W,t.E))
-        t.Label(mainframe, text="Tamanho do Endereço Lógico", bg= '#FFFFFF').grid(column= 3, row= 4, sticky= t.W)
+        self.tam_end_log_entry.grid(column= 3, row= 2, sticky=(t.W,t.E))
+        t.Label(mainframe, text="Tamanho do Endereço Lógico", bg= '#FFFFFF').grid(column= 3, row= 1, sticky= t.W)
 
         self.num_lin_tlb = t.StringVar()
         self.num_lin_tlb_entry = t.Entry(mainframe, width= 20, textvariable=self.num_lin_tlb)
-        self.num_lin_tlb_entry.grid(column= 3, row=8, sticky=(t.W,t.E))
-        t.Label(mainframe, text="Número de Linhas da TLB", bg= '#FFFFFF').grid(column= 3, row= 7, sticky= t.W)
+        self.num_lin_tlb_entry.grid(column= 3, row=5, sticky=(t.W,t.E))
+        t.Label(mainframe, text="Número de Linhas da TLB", bg= '#FFFFFF').grid(column= 3, row= 4, sticky= t.W)
 
 
         # --- COMBOBOX PARA UNIDADES DE MEMÓRIA ---
         self.unidade_memoriap_combobox = t.StringVar()
         self.unidade_memorias_combobox = t.StringVar()
         self.unidade_pagina_combobox = t.StringVar()
-        self.unidade_quadro_combobox = t.StringVar()
         self.unidade_endlog_combobox = t.StringVar()
 
 
         self.unidade_memoriap_combobox.set("KB - KiloBytes")
         self.unidade_memorias_combobox.set("KB - KiloBytes")
         self.unidade_pagina_combobox.set("KB - KiloBytes")
-        self.unidade_quadro_combobox.set("KB - KiloBytes")
-        self.unidade_endlog_combobox.set("KB - KiloBytes")
 
 
         t.Label(mainframe, bg='#FFFFFF').grid(column=1, row=0, sticky=t.W, padx=10, pady=5)
@@ -117,27 +109,10 @@ class Tela_Configurar(t.Frame):
             width=15
         )
 
-        self.combobox_unidade_quadro = ttk.Combobox(
-            mainframe,
-            textvariable=self.unidade_quadro_combobox,
-            values=["KB - KiloBytes", "MB - MegaBytes", "GB - GigaBytes"],
-            state="readonly",
-            width=15
-        )
-
-        self.combobox_unidade_endlog = ttk.Combobox(
-            mainframe,
-            textvariable=self.unidade_endlog_combobox,
-            values=["KB - KiloBytes", "MB - MegaBytes", "GB - GigaBytes"],
-            state="readonly",
-            width=15
-        )
 
         self.combobox_unidade_memoriap.grid(column=1, row=3, sticky=(t.W, t.E), padx=10, pady=2)
         self.combobox_unidade_memorias.grid(column=1, row=6, sticky=(t.W, t.E), padx=10, pady=2)
         self.combobox_unidade_pagina.grid(column=1, row=9, sticky=(t.W, t.E), padx=10, pady=2)
-        self.combobox_unidade_quadro.grid(column=3, row=3, sticky=(t.W, t.E), padx=10, pady=2)
-        self.combobox_unidade_endlog.grid(column=3, row=6, sticky=(t.W, t.E), padx=10, pady=2)
 
 
         for child in mainframe.winfo_children():
@@ -183,7 +158,6 @@ class Tela_Configurar(t.Frame):
         valor_tam_mem_fis_str = self.tam_mem_fis_entry.get()
         valor_tam_mem_sec_str = self.tam_mem_sec_entry.get()
         valor_tam_pagina_str = self.tam_pagina_entry.get()
-        valor_tam_quadro_str = self.tam_quad_mem_entry.get()
         valor_tam_end_log_str = self.tam_end_log_entry.get()
         valor_num_lin_tlb_str = self.num_lin_tlb_entry.get()
 
@@ -205,10 +179,9 @@ class Tela_Configurar(t.Frame):
 
         # Validação inicial de tipo e vazio para todos os campos numéricos
         valores_numericos['NUM_LINHAS_TLB'] = get_and_validate_int("Número de Linhas da TLB", valor_num_lin_tlb_str)
-        valores_numericos['TAMANHO_PAGINA'] = get_and_validate_int("Tamanho da Página do Processo", valor_tam_pagina_str)
-        valores_numericos['TAMANHO_MEMORIA_P'] = get_and_validate_int("Tamanho da Memória Física", valor_tam_mem_fis_str)
-        valores_numericos['TAMANHO_MEMORIA_S'] = get_and_validate_int("Tamanho da Memória Secundária", valor_tam_mem_sec_str)
-        valores_numericos['TAM_QUADRO'] = get_and_validate_int("Tamanho do Quadro de Memória", valor_tam_quadro_str)
+        valores_numericos['TAM_PAGINA_QUADRO'] = get_and_validate_int("Tamanho da Página do Processo", valor_tam_pagina_str)
+        valores_numericos['TAM_MEMORIA_P'] = get_and_validate_int("Tamanho da Memória Física", valor_tam_mem_fis_str)
+        valores_numericos['TAM_MEMORIA_S'] = get_and_validate_int("Tamanho da Memória Secundária", valor_tam_mem_sec_str)
         valores_numericos['TAM_END_LOGICO'] = get_and_validate_int("Tamanho do Endereço Lógico", valor_tam_end_log_str)
 
         # Se algum campo não passou na validação inicial (tipo ou vazio), get_and_validate_int já mostrou erro
@@ -223,27 +196,23 @@ class Tela_Configurar(t.Frame):
             return
 
         # TAMANHO_PAGINA
-        if valores_numericos['TAMANHO_PAGINA'] <= 0 or not self.ehPotenciaDeDois(valores_numericos['TAMANHO_PAGINA']):
+        if valores_numericos['TAM_PAGINA_QUADRO'] <= 0 or not self.ehPotenciaDeDois(valores_numericos['TAM_PAGINA_QUADRO']):
             messagebox.showerror("Erro de Validação", "ERRO: Tamanho da Página do Processo deve ser maior que zero e potência de 2.")
             return
 
         # TAMANHO_MEMORIA_P (Memória Física)
-        if valores_numericos['TAMANHO_MEMORIA_P'] <= 0 or \
-           valores_numericos['TAMANHO_MEMORIA_P'] < valores_numericos['TAMANHO_PAGINA'] or \
-           not self.ehPotenciaDeDois(valores_numericos['TAMANHO_MEMORIA_P']):
+        if valores_numericos['TAM_MEMORIA_P'] <= 0 or \
+           valores_numericos['TAM_MEMORIA_P'] < valores_numericos['TAM_PAGINA_QUADRO'] or \
+           not self.ehPotenciaDeDois(valores_numericos['TAM_MEMORIA_P']):
             messagebox.showerror("Erro de Validação", "ERRO: Tamanho da Memória Física deve ser maior que zero, maior ou igual ao Tamanho da Página do Processo e potência de 2.")
             return
             
         # Adicionando validação para os outros campos 
         # TAM_MEM_SECUNDARIA
-        if valores_numericos['TAMANHO_MEMORIA_S'] <= 0 or not self.ehPotenciaDeDois(valores_numericos['TAMANHO_MEMORIA_S']):
+        if valores_numericos['TAM_MEMORIA_S'] <= 0 or not self.ehPotenciaDeDois(valores_numericos['TAM_MEMORIA_S']):
             messagebox.showerror("Erro de Validação", "ERRO: Tamanho da Memória Secundária deve ser maior que zero e potência de 2.")
             return
 
-        # TAM_QUADRO
-        if valores_numericos['TAM_QUADRO'] <= 0 or not self.ehPotenciaDeDois(valores_numericos['TAM_QUADRO']):
-            messagebox.showerror("Erro de Validação", "ERRO: Tamanho do Quadro de Memória deve ser maior que zero e potência de 2.")
-            return
         
         # TAM_END_LOGICO
         if valores_numericos['TAM_END_LOGICO'] <= 0 or not self.ehPotenciaDeDois(valores_numericos['TAM_END_LOGICO']):
@@ -263,16 +232,12 @@ class Tela_Configurar(t.Frame):
         info_tam_memp = self.tam_mem_fis_entry.get()
         info_tam_mems = self.tam_mem_sec_entry.get()
         info_tam_pag = self.tam_pagina_entry.get()
-        info_tam_quadro = self.tam_quad_mem_entry.get()
         info_tam_endlog = self.tam_end_log_entry.get()
         info_num_lin_tlb = self.num_lin_tlb_entry.get()
 
         info_unidade_memp = self.combobox_unidade_memoriap.get()
         info_unidade_mems = self.combobox_unidade_memorias.get()
         info_unidade_pag = self.combobox_unidade_pagina.get()
-        info_unidade_quadro = self.combobox_unidade_quadro.get()
-        info_unidade_endlog = self.combobox_unidade_endlog.get()
-
 
         try:
             with open("config.py", "r") as arquivo:
@@ -285,15 +250,12 @@ class Tela_Configurar(t.Frame):
         novas_configs = {
             "TAM_MEM_PRINCIPAL": info_tam_memp,
             "TAM_MEM_SECUNDARIA": info_tam_mems,
-            "TAM_PAGINA": info_tam_pag,
-            "TAM_QUADRO": info_tam_quadro,
+            "TAM_PAGINA_QUADRO": info_tam_pag,
             "TAM_END_LOGICO": info_tam_endlog,
             "NUM_LINHAS_TLB": info_num_lin_tlb,
             "UNID_MEMP" : info_unidade_memp,
             "UNID_MEMS" : info_unidade_mems,
-            "UNID_PAG" : info_unidade_pag,
-            "UNID_QUAD" : info_unidade_quadro,
-            "UNID_ENDLOG" : info_unidade_endlog,
+            "UNID_PAG_QUAD" : info_unidade_pag,
         }
 
         novas_linhas_conteudo = []

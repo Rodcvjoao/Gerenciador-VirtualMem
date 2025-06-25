@@ -1,31 +1,30 @@
 from enum import Enum
 
-
-POLITICA_SUB = 0  # 0 para LRU, 1 para Relógio
-TAM_MEM_PRINCIPAL = "1024"
-TAM_PAGINA = "8"
-NUM_LINHAS_TLB = "8"
-TAM_MEM_SECUNDARIA = "64"
-TAM_QUADRO = "16"
-TAM_END_LOGICO = "8"
+# Configurações do sistema de memória virtual
+# Estas configurações podem ser modificadas diretamente neste arquivo
 
 # Vinda das informações da interface
 TAM_MEM_PRINCIPAL = "1024"
 TAM_MEM_SECUNDARIA = "64"
-TAM_PAGINA = "8"
-TAM_QUADRO = "16"
+TAM_PAGINA_QUADRO = "128"
+TAM_QUADRO = "2"
 TAM_END_LOGICO = "8"
-NUM_LINHAS_TLB = "8"
+NUM_LINHAS_TLB = "64"
 
+# Tratamento das strings para inteiros
+TAMANHO_MEMORIA_P = int(TAM_MEM_PRINCIPAL)
+TAMANHO_MEMORIA_S = int(TAM_MEM_SECUNDARIA)
+TAMANHO_PAGINA_QUADRO = int(TAM_PAGINA_QUADRO)
+TAMANHO_QUADRO = int(TAM_QUADRO)
+TAMANHO_END_LOGICO = int(TAM_END_LOGICO)
+NUMERO_LINHAS_TLB = int(NUM_LINHAS_TLB)
 
 UNID_MEMP = "KB - KiloBytes"
 UNID_MEMS = "KB - KiloBytes"
-UNID_PAG = "KB - KiloBytes"
-UNID_QUAD = "KB - KiloBytes"
-UNID_ENDLOG = "KB - KiloBytes"
+UNID_PAG_QUAD = "KB - KiloBytes"
 
 
-lista_unidade = [UNID_MEMP, UNID_MEMS, UNID_PAG, UNID_QUAD, UNID_ENDLOG]
+lista_unidade = [UNID_MEMP, UNID_MEMS, UNID_PAG_QUAD]
 
 # Tratamento das unidades em strings para inteiros
 for i in range(len(lista_unidade)):
@@ -38,7 +37,7 @@ for i in range(len(lista_unidade)):
 
 
 # Pegando o nome do arquivo teste
-ARQ_TESTE = "lalalla"
+ARQ_TESTE = "aaaaaaaboa.py"
 
 
 # Define a política a ser usada na substituição de quadros na MP
@@ -49,4 +48,3 @@ POLITICA_SUB = 0
 class PoliticaSub(Enum):
     LRU = 0
     Relogio = 1
-
