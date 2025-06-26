@@ -6,7 +6,7 @@ from enum import Enum
 # Vinda das informações da interface
 TAM_MEM_PRINCIPAL = "1024"
 TAM_MEM_SECUNDARIA = "64"
-TAM_PAGINA_QUADRO = "64"
+TAM_PAGINA_QUADRO = "8"
 TAM_QUADRO = "2"
 TAM_END_LOGICO = "64"
 NUM_LINHAS_TLB = "8"

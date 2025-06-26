@@ -19,11 +19,6 @@ class Tela_Simular(tk.Frame):
         self.controller = controller
         self.configure(bg='#181f30')
         
-        # Configurar tamanho da janela para grande
-        if hasattr(parent, 'geometry'):
-            parent.geometry('1200x800')  # Tamanho grande
-            parent.minsize(1200, 800)    # Tamanho mínimo
-        
         # Variáveis da simulação
         self.mp = None
         self.tlb = None
@@ -39,16 +34,16 @@ class Tela_Simular(tk.Frame):
         """Cria todos os elementos da interface"""
         # Frame principal
         main_frame = tk.Frame(self, bg='#181f30')
-        main_frame.pack(fill='both', expand=True, padx=15, pady=15)
+        main_frame.pack(fill='both', expand=True, padx=10, pady=10)
         
         # Título
         titulo = tk.Label(main_frame, text="Simulador de Gerenciamento de Memória", 
-                         font=('Arial', 20, 'bold'), bg='#181f30', fg='white')
-        titulo.pack(pady=(0, 15))
+                         font=('Arial', 16, 'bold'), bg='#181f30', fg='white')
+        titulo.pack(pady=(0, 10))
         
         # Frame superior (controles e informações)
         top_frame = tk.Frame(main_frame, bg='#181f30')
-        top_frame.pack(fill='x', pady=(0, 15))
+        top_frame.pack(fill='x', pady=(0, 10))
         
         # Botões de controle
         controles_frame = tk.Frame(top_frame, bg='#181f30')
@@ -56,14 +51,14 @@ class Tela_Simular(tk.Frame):
         
         btn_iniciar = tk.Button(controles_frame, text="Iniciar Simulação", 
                                command=self.iniciar_simulacao,
-                               font=('Arial', 14, 'bold'), bg='#38a169', fg='white',
-                               relief='flat', padx=25, pady=12)
-        btn_iniciar.pack(side='left', padx=(0, 15))
+                               font=('Arial', 12), bg='#38a169', fg='white',
+                               relief='flat', padx=20, pady=8)
+        btn_iniciar.pack(side='left', padx=(0, 10))
         
         btn_reset = tk.Button(controles_frame, text="Reset", 
                             command=self.reset_simulacao,
-                            font=('Arial', 14, 'bold'), bg='#e53e3e', fg='white',
-                            relief='flat', padx=25, pady=12)
+                            font=('Arial', 12), bg='#e53e3e', fg='white',
+                            relief='flat', padx=20, pady=8)
         btn_reset.pack(side='left')
         
         # Informações do ciclo atual
@@ -71,25 +66,24 @@ class Tela_Simular(tk.Frame):
         info_frame.pack(side='right')
         
         self.label_arquivo = tk.Label(info_frame, text=f"Arquivo: {ARQ_TESTE}", 
-                                    font=('Arial', 12), bg='#181f30', fg='#a0aec0')
+                                    font=('Arial', 10), bg='#181f30', fg='#a0aec0')
         self.label_arquivo.pack(anchor='e')
         
         self.label_ciclo = tk.Label(info_frame, text=f"Ciclo: {self.ciclo_atual}", 
-                                   font=('Arial', 16, 'bold'), bg='#181f30', fg='white')
+                                   font=('Arial', 12, 'bold'), bg='#181f30', fg='white')
         self.label_ciclo.pack(anchor='e')
         
         self.label_comando = tk.Label(info_frame, text="Comando atual: -", 
-                                    font=('Arial', 12), bg='#181f30', fg='#a0aec0')
+                                    font=('Arial', 10), bg='#181f30', fg='#a0aec0')
         self.label_comando.pack(anchor='e')
         
-        # Frame central (tabelas) - Layout horizontal melhorado
+        # Frame central (tabelas)
         central_frame = tk.Frame(main_frame, bg='#181f30')
-        central_frame.pack(fill='both', expand=True, pady=(0, 15))
+        central_frame.pack(fill='both', expand=True, pady=(0, 10))
         
-        # Frame esquerdo (TLB e Estatísticas) - Largura fixa
-        left_frame = tk.Frame(central_frame, bg='#181f30', width=450)
-        left_frame.pack(side='left', fill='y', padx=(0, 10))
-        left_frame.pack_propagate(False)
+        # Frame esquerdo (TLB e Estatísticas)
+        left_frame = tk.Frame(central_frame, bg='#181f30')
+        left_frame.pack(side='left', fill='both', expand=True, padx=(0, 5))
         
         # TLB
         self.criar_tabela_tlb(left_frame)
@@ -97,9 +91,9 @@ class Tela_Simular(tk.Frame):
         # Estatísticas
         self.criar_frame_estatisticas(left_frame)
         
-        # Frame direito (Memórias) - Expande para ocupar o resto
+        # Frame direito (Memórias)
         right_frame = tk.Frame(central_frame, bg='#181f30')
-        right_frame.pack(side='right', fill='both', expand=True, padx=(10, 0))
+        right_frame.pack(side='right', fill='both', expand=True, padx=(5, 0))
         
         # Memória Principal
         self.criar_tabela_memoria_principal(right_frame)
@@ -109,170 +103,148 @@ class Tela_Simular(tk.Frame):
         
         # Frame inferior (botões de navegação e configurações)
         bottom_frame = tk.Frame(main_frame, bg='#181f30')
-        bottom_frame.pack(fill='x', pady=(15, 0))
+        bottom_frame.pack(fill='x', pady=(10, 0))
         
-        # Botões de navegação - DESTACADOS e MAIORES
-        nav_frame = tk.Frame(bottom_frame, bg='#2d3748', relief='raised', bd=3)
-        nav_frame.pack(pady=(0, 20), padx=80, fill='x')
+        # Botões de navegação - DESTACADOS
+        nav_frame = tk.Frame(bottom_frame, bg='#2d3748', relief='raised', bd=2)
+        nav_frame.pack(pady=(0, 15), padx=50, fill='x')
         
         nav_title = tk.Label(nav_frame, text="Controle de Execução", 
-                            font=('Arial', 16, 'bold'), bg='#2d3748', fg='white')
-        nav_title.pack(pady=(15, 10))
+                            font=('Arial', 12, 'bold'), bg='#2d3748', fg='white')
+        nav_title.pack(pady=(10, 5))
         
         buttons_frame = tk.Frame(nav_frame, bg='#2d3748')
-        buttons_frame.pack(pady=(0, 15))
+        buttons_frame.pack(pady=(0, 10))
         
         self.btn_voltar = tk.Button(buttons_frame, text="◀ Voltar", 
                                    command=self.voltar_ciclo,
-                                   font=('Arial', 14, 'bold'), bg='#4299e1', fg='white',
-                                   width=15, height=3, relief='flat', state='disabled')
-        self.btn_voltar.pack(side='left', padx=(0, 30))
+                                   font=('Arial', 12, 'bold'), bg='#4299e1', fg='white',
+                                   width=12, height=2, relief='flat', state='disabled')
+        self.btn_voltar.pack(side='left', padx=(0, 20))
         
         self.label_ciclo_nav = tk.Label(buttons_frame, text=f"Ciclo {self.ciclo_atual}", 
-                                       font=('Arial', 20, 'bold'), bg='#2d3748', fg='white')
-        self.label_ciclo_nav.pack(side='left', padx=40)
+                                       font=('Arial', 16, 'bold'), bg='#2d3748', fg='white')
+        self.label_ciclo_nav.pack(side='left', padx=30)
         
         self.btn_proximo = tk.Button(buttons_frame, text="Próximo ▶", 
                                     command=self.executar_proximo_ciclo,
-                                    font=('Arial', 14, 'bold'), bg='#38a169', fg='white',
-                                    width=15, height=3, relief='flat', state='disabled')
-        self.btn_proximo.pack(side='left', padx=(30, 0))
+                                    font=('Arial', 12, 'bold'), bg='#38a169', fg='white',
+                                    width=12, height=2, relief='flat', state='disabled')
+        self.btn_proximo.pack(side='left', padx=(20, 0))
         
         # Status da simulação
         self.label_status = tk.Label(nav_frame, text="Status: Aguardando início", 
-                                    font=('Arial', 12), bg='#2d3748', fg='#a0aec0')
-        self.label_status.pack(pady=(0, 15))
+                                    font=('Arial', 10), bg='#2d3748', fg='#a0aec0')
+        self.label_status.pack(pady=(0, 10))
         
         # Informações de configuração
         config_frame = tk.Frame(bottom_frame, bg='#181f30')
-        config_frame.pack(pady=(0, 15))
+        config_frame.pack(pady=(0, 10))
         
         config_info = tk.Label(config_frame, 
                               text=f"Configurações: Mem. Principal: {TAMANHO_MEMORIA_P}KB | "
                                    f"Página/Quadro: {TAMANHO_PAGINA_QUADRO}B | "
                                    f"TLB: {NUMERO_LINHAS_TLB} linhas | "
                                    f"Política: {'LRU' if POLITICA_SUB == 0 else 'Relógio'}",
-                              font=('Arial', 11), bg='#181f30', fg='#a0aec0')
+                              font=('Arial', 9), bg='#181f30', fg='#a0aec0')
         config_info.pack()
         
         # Botão voltar para página inicial
         if self.controller:
             btn_home = tk.Button(bottom_frame, text="← Voltar ao Menu", 
                                command=lambda: self.controller.show_page("ui_pagina_inicial.py"),
-                               font=('Arial', 12), bg='#2d3748', fg='white',
-                               relief='flat', padx=20, pady=8)
-            btn_home.pack(anchor='w', pady=(15, 0))
+                               font=('Arial', 10), bg='#2d3748', fg='white',
+                               relief='flat', padx=15, pady=5)
+            btn_home.pack(anchor='w', pady=(10, 0))
     
     def criar_tabela_tlb(self, parent):
         """Cria a tabela TLB"""
         frame_tlb = tk.LabelFrame(parent, text="TLB (Translation Lookaside Buffer)", 
-                                 font=('Arial', 13, 'bold'), bg='#2d3748', fg='white')
-        frame_tlb.pack(fill='both', expand=True, pady=(0, 15))
+                                 font=('Arial', 11, 'bold'), bg='#2d3748', fg='white')
+        frame_tlb.pack(fill='both', expand=True, pady=(0, 10))
         
         # Estilo para treeview
         style = ttk.Style()
         style.theme_use('clam')
-        style.configure("Custom.Treeview", 
-                       background="#4a5568", 
-                       foreground="white", 
-                       fieldbackground="#4a5568", 
-                       borderwidth=0,
-                       rowheight=25)  # Altura das linhas
-        style.configure("Custom.Treeview.Heading", 
-                       background="#2d3748", 
-                       foreground="white",
-                       font=('Arial', 11, 'bold'))
+        style.configure("Custom.Treeview", background="#4a5568", foreground="white", 
+                       fieldbackground="#4a5568", borderwidth=0)
+        style.configure("Custom.Treeview.Heading", background="#2d3748", foreground="white")
         
         self.tree_tlb = ttk.Treeview(frame_tlb, columns=('processo', 'vpn', 'pfn'), 
-                                    show='headings', height=10, style="Custom.Treeview")
+                                    show='headings', height=6, style="Custom.Treeview")
         
         self.tree_tlb.heading('processo', text='Processo')
         self.tree_tlb.heading('vpn', text='VPN')
         self.tree_tlb.heading('pfn', text='PFN')
         
-        self.tree_tlb.column('processo', width=120, anchor='center')
-        self.tree_tlb.column('vpn', width=120, anchor='center')
-        self.tree_tlb.column('pfn', width=120, anchor='center')
+        self.tree_tlb.column('processo', width=80, anchor='center')
+        self.tree_tlb.column('vpn', width=80, anchor='center')
+        self.tree_tlb.column('pfn', width=80, anchor='center')
         
-        # Scrollbar para TLB
-        scrollbar_tlb = ttk.Scrollbar(frame_tlb, orient="vertical", command=self.tree_tlb.yview)
-        self.tree_tlb.configure(yscrollcommand=scrollbar_tlb.set)
-        
-        self.tree_tlb.pack(side="left", fill='both', expand=True, padx=8, pady=8)
-        scrollbar_tlb.pack(side="right", fill="y", padx=(0, 8), pady=8)
+        self.tree_tlb.pack(fill='both', expand=True, padx=5, pady=5)
     
     def criar_frame_estatisticas(self, parent):
         """Cria o frame de estatísticas"""
         frame_stats = tk.LabelFrame(parent, text="Estatísticas da TLB", 
-                                   font=('Arial', 13, 'bold'), bg='#2d3748', fg='white')
-        frame_stats.pack(fill='x', pady=(0, 15))
+                                   font=('Arial', 11, 'bold'), bg='#2d3748', fg='white')
+        frame_stats.pack(fill='x', pady=(0, 10))
         
         stats_content = tk.Frame(frame_stats, bg='#2d3748')
-        stats_content.pack(fill='both', expand=True, padx=15, pady=15)
+        stats_content.pack(fill='both', expand=True, padx=10, pady=10)
         
         self.label_acertos = tk.Label(stats_content, text="Acertos: 0", 
-                                     font=('Arial', 13, 'bold'), bg='#2d3748', fg='#68d391')
-        self.label_acertos.pack(anchor='w', pady=3)
+                                     font=('Arial', 11), bg='#2d3748', fg='#68d391')
+        self.label_acertos.pack(anchor='w', pady=2)
         
         self.label_falhas = tk.Label(stats_content, text="Falhas: 0", 
-                                    font=('Arial', 13, 'bold'), bg='#2d3748', fg='#f56565')
-        self.label_falhas.pack(anchor='w', pady=3)
+                                    font=('Arial', 11), bg='#2d3748', fg='#f56565')
+        self.label_falhas.pack(anchor='w', pady=2)
         
         self.label_taxa = tk.Label(stats_content, text="Taxa de Acerto: 0%", 
-                                  font=('Arial', 13, 'bold'), bg='#2d3748', fg='#63b3ed')
-        self.label_taxa.pack(anchor='w', pady=3)
+                                  font=('Arial', 11), bg='#2d3748', fg='#63b3ed')
+        self.label_taxa.pack(anchor='w', pady=2)
     
     def criar_tabela_memoria_principal(self, parent):
         """Cria a tabela de Memória Principal"""
         frame_mp = tk.LabelFrame(parent, text="Memória Principal", 
-                                font=('Arial', 13, 'bold'), bg='#2d3748', fg='white')
-        frame_mp.pack(fill='both', expand=True, pady=(0, 15))
+                                font=('Arial', 11, 'bold'), bg='#2d3748', fg='white')
+        frame_mp.pack(fill='both', expand=True, pady=(0, 10))
         
         self.tree_mp = ttk.Treeview(frame_mp, columns=('quadro', 'processo', 'pagina', 'modificada'), 
-                                   show='headings', height=12, style="Custom.Treeview")
+                                   show='headings', height=8, style="Custom.Treeview")
         
         self.tree_mp.heading('quadro', text='Quadro')
         self.tree_mp.heading('processo', text='Processo')
         self.tree_mp.heading('pagina', text='Página')
-        self.tree_mp.heading('modificada', text='Modificada')
+        self.tree_mp.heading('modificada', text='Mod.')
         
-        self.tree_mp.column('quadro', width=100, anchor='center')
-        self.tree_mp.column('processo', width=120, anchor='center')
-        self.tree_mp.column('pagina', width=100, anchor='center')
-        self.tree_mp.column('modificada', width=120, anchor='center')
+        self.tree_mp.column('quadro', width=60, anchor='center')
+        self.tree_mp.column('processo', width=70, anchor='center')
+        self.tree_mp.column('pagina', width=60, anchor='center')
+        self.tree_mp.column('modificada', width=50, anchor='center')
         
-        # Scrollbar para Memória Principal
-        scrollbar_mp = ttk.Scrollbar(frame_mp, orient="vertical", command=self.tree_mp.yview)
-        self.tree_mp.configure(yscrollcommand=scrollbar_mp.set)
-        
-        self.tree_mp.pack(side="left", fill='both', expand=True, padx=8, pady=8)
-        scrollbar_mp.pack(side="right", fill="y", padx=(0, 8), pady=8)
+        self.tree_mp.pack(fill='both', expand=True, padx=5, pady=5)
     
     def criar_tabela_processos(self, parent):
         """Cria a tabela de Processos Ativos"""
         frame_proc = tk.LabelFrame(parent, text="Processos Ativos", 
-                                  font=('Arial', 13, 'bold'), bg='#2d3748', fg='white')
+                                  font=('Arial', 11, 'bold'), bg='#2d3748', fg='white')
         frame_proc.pack(fill='both', expand=True)
         
         self.tree_proc = ttk.Treeview(frame_proc, columns=('id', 'estado', 'tamanho', 'paginas'), 
-                                     show='headings', height=8, style="Custom.Treeview")
+                                     show='headings', height=6, style="Custom.Treeview")
         
         self.tree_proc.heading('id', text='ID')
         self.tree_proc.heading('estado', text='Estado')
         self.tree_proc.heading('tamanho', text='Tamanho (B)')
         self.tree_proc.heading('paginas', text='Páginas')
         
-        self.tree_proc.column('id', width=80, anchor='center')
-        self.tree_proc.column('estado', width=100, anchor='center')
-        self.tree_proc.column('tamanho', width=120, anchor='center')
-        self.tree_proc.column('paginas', width=100, anchor='center')
+        self.tree_proc.column('id', width=40, anchor='center')
+        self.tree_proc.column('estado', width=60, anchor='center')
+        self.tree_proc.column('tamanho', width=80, anchor='center')
+        self.tree_proc.column('paginas', width=60, anchor='center')
         
-        # Scrollbar para Processos
-        scrollbar_proc = ttk.Scrollbar(frame_proc, orient="vertical", command=self.tree_proc.yview)
-        self.tree_proc.configure(yscrollcommand=scrollbar_proc.set)
-        
-        self.tree_proc.pack(side="left", fill='both', expand=True, padx=8, pady=8)
-        scrollbar_proc.pack(side="right", fill="y", padx=(0, 8), pady=8)
+        self.tree_proc.pack(fill='both', expand=True, padx=5, pady=5)
     
     def carregar_comandos_arquivo(self):
         """Carrega comandos do arquivo de teste configurado"""

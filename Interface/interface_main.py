@@ -12,7 +12,7 @@ class App(t.Tk):
 
         self.title("GMV - Trabalho de Sistemas Operacionais")
         self.minsize(700,500)
-        self.maxsize(700,500)
+        self.maxsize(700,900)
         self.configure(background= '#181f30')
 
         self.grid_rowconfigure(0, weight=1)
