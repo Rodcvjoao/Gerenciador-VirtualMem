@@ -6,7 +6,7 @@ import re
 class Tela_Configurar(t.Frame):
 
     def __init__(self, parent_frame, controller):
-        super().__init__(parent_frame, background='#181f30')
+        super().__init__(parent_frame, background='#181f30', relief="flat", bd=0)
         self.controller = controller
 
         style = ttk.Style()
@@ -34,7 +34,7 @@ class Tela_Configurar(t.Frame):
             t.Label(self, text="Imagem não encontrada!", fg="red", bg="white").grid(row=0, column=0, rowspan=8, columnspan=5, sticky="nsew")
 
 
-        mainframe = ttk.Frame(self, style= "Customize.TFrame")
+        mainframe = t.Frame(self, bg="white", relief="flat", bd=0)
         mainframe.place(x= 60, y= 125)
 
         for col in range(5):

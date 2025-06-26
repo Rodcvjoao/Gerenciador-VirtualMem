@@ -29,7 +29,7 @@ class Tela_Inicial(t.Frame):
             t.Label(self, text="Imagem 'Página Inicial UI.png' não encontrada.", fg="red", bg="white").grid(row=0, column=0, rowspan=3, columnspan=5, sticky="nsew")
 
     
-        auxiliar_botao = ttk.Frame(self, style= "Custom.TFrame")
+        auxiliar_botao = t.Frame(self, bg="white", relief="flat", bd=0)
         auxiliar_botao.grid(column= 1, row= 1, columnspan=5, sticky= "w")
 
         for col in range(5):
@@ -48,6 +48,9 @@ class Tela_Inicial(t.Frame):
             width=30,
             fg="#FFFFFF",
             bg="#0C0E8B",
+            relief="flat",           
+            bd=0,                   
+            highlightthickness=0,
             font=("monospace", 12, "bold"),
             command=lambda: self.controller.show_page("ui_pagina_configurar.py"),
             activebackground="#393CD1",
