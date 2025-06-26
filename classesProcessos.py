@@ -87,7 +87,6 @@ class EntradaTP:
         
         self.pagina = Pagina(idProcesso, idEntrada)
 
-
 class Pagina:
     def __init__(self, idProcesso, idPagina):
         self.idProcesso = idProcesso
