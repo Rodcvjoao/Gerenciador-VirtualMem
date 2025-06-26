@@ -6,50 +6,110 @@ from config import *
 
 # ... (FUNÇÕES AUXILIARES) ...
 def tratar_acesso_memoria(processo, endereco_virtual, tlb, mp, tipo_acesso, processos_lista):
+    """
+    Trata um acesso à memória virtual, lidando com tradução de endereços,
+    page faults, e atualizações de bits de controle.
+    
+    Args:
+        processo: Processo que está fazendo o acesso
+        endereco_virtual: Endereço virtual a ser acessado
+        tlb: Translation Lookaside Buffer
+        mp: Memória Principal
+        tipo_acesso: Tipo de acesso ('R' = Read, 'W' = Write, 'P' = Program)
+        processos_lista: Lista de todos os processos ativos
+    """
+    
     print(f"\n[Acesso] P{processo.id}: Tentando acesso '{tipo_acesso}' ao endereço virtual {endereco_virtual}")
-    processo.estado = "E"
+    processo.estado = "E"  # Processo em execução
 
+    # Calcula o número da página virtual
     numero_pagina_virtual = endereco_virtual // TAMANHO_PAGINA_QUADRO
     
+    # Verifica se o endereço está dentro do espaço de endereçamento do processo
     if numero_pagina_virtual >= processo.quantidadePaginas:
         print(f"!!! ERRO DE SEGMENTAÇÃO !!!: Endereço {endereco_virtual} está fora do espaço de endereçamento do P{processo.id}.")
-        processo.estado = "F"
+        processo.estado = "F"  # Processo finalizado por erro
         return
 
+    # Tenta traduzir o endereço virtual para físico
     endereco_fisico, page_fault = processo.tabelaPaginas.traduzirEndereco(endereco_virtual, tlb)
 
     if not page_fault:
+        # ACESSO BEM-SUCEDIDO - Página está na memória principal
         print(f"P{processo.id}: Endereço encontrado na Memória Principal.")
+        
+        # Atualizar bits de referência e controle
+        entrada_tp = processo.tabelaPaginas.entradas[numero_pagina_virtual]
+        quadro_correspondente = mp.quadros[entrada_tp.enderecoMemoriaPrincipal]
+        
+        # Marca a página como referenciada (importante para algoritmos de substituição)
+        quadro_correspondente.pagina.referenciada = True
+        quadro_correspondente.bitUtilizado = True
+        
+        # Atualizar lista LRU - move para o final (mais recentemente usado)
+        if quadro_correspondente in mp.quadrosRefsLRU:
+            mp.quadrosRefsLRU.remove(quadro_correspondente)
+        mp.quadrosRefsLRU.append(quadro_correspondente)
+        
+        print(f"P{processo.id}: Endereço físico {endereco_fisico} acessado com sucesso.")
+        
     else:
+        # PAGE FAULT - Página não está na memória principal
         print(f"P{processo.id}: FALTA DE PÁGINA (Page Fault) para o endereço virtual {endereco_virtual}!")
-        processo.estado = "B"
+        processo.estado = "B"  # Processo bloqueado aguardando I/O
 
+        # Busca a página que precisa ser carregada
         pagina_necessaria = processo.tabelaPaginas.entradas[numero_pagina_virtual].pagina
+        
+        # Carrega a página na memória principal
         quadro_alocado, pagina_substituida = mp.carregaPagina(processo, pagina_necessaria)
 
+        # Se uma página foi substituída, precisa invalidar suas referências
         if pagina_substituida:
+            # Encontra o processo dono da página substituída
             processo_dono = next((p for p in processos_lista if p.id == pagina_substituida.idProcesso), None)
+            
             if processo_dono:
+                # Invalida a entrada na tabela de páginas do processo dono
                 entrada_antiga = processo_dono.tabelaPaginas.entradas[pagina_substituida.idPagina]
                 entrada_antiga.bitPresenca = False
                 entrada_antiga.enderecoMemoriaPrincipal = None
+                
+                # Invalida a entrada correspondente na TLB
                 tlb.invalidar_entrada(processo_dono.id, pagina_substituida.idPagina)
+                
                 print(f"Página {pagina_substituida.idPagina} do processo P{processo_dono.id} invalidada.")
 
-        processo.tabelaPaginas.entradas[numero_pagina_virtual].bitPresenca = True
-        processo.tabelaPaginas.entradas[numero_pagina_virtual].enderecoMemoriaPrincipal = quadro_alocado.idQuadro
+        # Atualiza a tabela de páginas do processo atual
+        entrada_atual = processo.tabelaPaginas.entradas[numero_pagina_virtual]
+        entrada_atual.bitPresenca = True
+        entrada_atual.enderecoMemoriaPrincipal = quadro_alocado.idQuadro
+        
         print(f"P{processo.id}: Página {pagina_necessaria.idPagina} carregada no quadro {quadro_alocado.idQuadro}.")
 
+        # Insere a nova tradução na TLB
         tlb.inserir(processo.id, numero_pagina_virtual, quadro_alocado.idQuadro)
+        
+        # Processo volta ao estado pronto
         processo.estado = "P"
 
+    # TRATAMENTO ESPECÍFICO PARA OPERAÇÕES DE ESCRITA
     if tipo_acesso == "W":
+        # Marca a página como modificada (dirty bit)
         entrada_tp = processo.tabelaPaginas.entradas[numero_pagina_virtual]
         quadro_correspondente = mp.quadros[entrada_tp.enderecoMemoriaPrincipal]
+        
+        # Atualiza os bits de modificação
         quadro_correspondente.pagina.modificada = True
         entrada_tp.bitModificacao = True
+        
         print(f"P{processo.id}: Página {numero_pagina_virtual} marcada como modificada (M=1).")
 
+    # ATUALIZAÇÃO FINAL DO ESTADO DO PROCESSO
+    if processo.estado == "E":
+        processo.estado = "P"  # Volta para pronto após completar o acesso
+
+        
 def print_estado_sistema(mp, tlb, processos):
     print("\n" + "="*50)
     print("ESTADO ATUAL DO SISTEMA")

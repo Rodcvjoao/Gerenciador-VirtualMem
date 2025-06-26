@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from config import TAMANHO_TLB
+from config import NUMERO_LINHAS_TLB
 
 class EntradaTLB:
     def __init__(self, numeroPaginaVirtual, numeroFrameFisico, idProcesso):
@@ -10,7 +10,7 @@ class EntradaTLB:
 
 class TLB:
     def __init__(self, tamanho=None):
-        self.tamanho = tamanho if tamanho is not None else TAMANHO_TLB
+        self.tamanho = tamanho if tamanho is not None else NUMERO_LINHAS_TLB
         self.entradas = OrderedDict()
         self.acertos = 0
         self.falhas = 0

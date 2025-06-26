@@ -6,10 +6,10 @@ from enum import Enum
 # Vinda das informações da interface
 TAM_MEM_PRINCIPAL = "1024"
 TAM_MEM_SECUNDARIA = "64"
-TAM_PAGINA_QUADRO = "128"
+TAM_PAGINA_QUADRO = "1024"
 TAM_QUADRO = "2"
 TAM_END_LOGICO = "8"
-NUM_LINHAS_TLB = "64"
+NUM_LINHAS_TLB = "16"
 
 # Tratamento das strings para inteiros
 TAMANHO_MEMORIA_P = int(TAM_MEM_PRINCIPAL)
@@ -36,7 +36,7 @@ for i in range(len(lista_unidade)):
 
 
 # Pegando o nome do arquivo teste
-ARQ_TESTE = "aaaaaaaboa.py"
+ARQ_TESTE = "amor.py"
 
 
 # Define a política a ser usada na substituição de quadros na MP

@@ -26,14 +26,17 @@ class MemoriaPrincipal:
     def carregaPagina(self, processo, pagina_nova):
         # Primeiro, verifica se há quadros livres
         for q in self.quadros:
-            if q.pagina is None:
+            if q.pagina is None:  # Quadro livre
                 q.pagina = pagina_nova
                 q.bitUtilizado = True
+                
+                # Remove da lista se já estiver (caso raro)
                 if q in self.quadrosRefsLRU:
-                    # Se esse quadro já tiver sido referenciado, retire da sua posição atual
-                    # e coloque no fim da fila. (Na política LRU, ele foi o mais recentemente acessado)
-                    self.quadrosRefsLRU.pop(self.quadrosRefsLRU.index(q))
-                # Retorna o quadro alocado e None, pois nenhuma página foi substituída
+                    self.quadrosRefsLRU.remove(q)
+                
+                # Sempre adiciona no final (mais recentemente usado)
+                self.quadrosRefsLRU.append(q)
+                
                 return q, None
             
         # Se não há quadros livres, chama a política de substituição
@@ -80,10 +83,10 @@ class MemoriaPrincipal:
             else:
                 quadroAtual.bitUtilizado = False
                 self.nextFrameRelogio = (self.nextFrameRelogio + 1) % self.quantidadeQuadros
-            self.nextFrameRelogio += 1
+           
 
     def writeBack(self, pagina):
-        pass
+        print(f"Write-back: Salvando página {pagina.idPagina} do processo P{pagina.idProcesso} no disco")
 
 class Quadro:
     def __init__(self, indiceQuadro):
