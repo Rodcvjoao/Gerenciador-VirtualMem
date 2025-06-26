@@ -1,13 +1,16 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import re
-import sys 
+import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from memoriaPrincipal import MemoriaPrincipal
-from config import *
+from config import (
+    ARQUIVO_TESTE, TAMANHO_MEMORIA_PRINCIPAL_STR, TAMANHO_PAGINA_QUADRO_STR,
+    NUMERO_LINHAS_TLB, POLITICA_SUB, MAPA_UNIDADES
+)
 from tlb import TLB
 from classesProcessos import Processo
 from main import tratar_acesso_memoria
@@ -20,10 +23,10 @@ class Tela_Simular(tk.Frame):
         self.configure(bg='#181f30')
         
         # Variáveis da simulação
-        self.mp = None
-        self.tlb = None
-        self.processos_lista = []
-        self.comandos = []
+        self.mp: MemoriaPrincipal | None = None
+        self.tlb: TLB | None = None
+        self.processos_lista: list[Processo] = []
+        self.comandos: list[tuple] = []
         self.ciclo_atual = 0
         self.simulacao_iniciada = False
         
@@ -65,7 +68,7 @@ class Tela_Simular(tk.Frame):
         info_frame = tk.Frame(top_frame, bg='#181f30')
         info_frame.pack(side='right')
         
-        self.label_arquivo = tk.Label(info_frame, text=f"Arquivo: {ARQ_TESTE}", 
+        self.label_arquivo = tk.Label(info_frame, text=f"Arquivo: {ARQUIVO_TESTE}", 
                                     font=('Arial', 10), bg='#181f30', fg='#a0aec0')
         self.label_arquivo.pack(anchor='e')
         
@@ -93,13 +96,16 @@ class Tela_Simular(tk.Frame):
         
         # Frame direito (Memórias)
         right_frame = tk.Frame(central_frame, bg='#181f30')
-        right_frame.pack(side='right', fill='both', expand=True, padx=(5, 0))
+        right_frame.pack(side='left', fill='both', expand=True, padx=(5, 0))
         
         # Memória Principal
         self.criar_tabela_memoria_principal(right_frame)
         
         # Processos Ativos
         self.criar_tabela_processos(right_frame)
+        
+        # Memória Secundária
+        self.criar_tabela_memoria_secundaria(right_frame)
         
         # Frame inferior (botões de navegação e configurações)
         bottom_frame = tk.Frame(main_frame, bg='#181f30')
@@ -141,18 +147,17 @@ class Tela_Simular(tk.Frame):
         config_frame = tk.Frame(bottom_frame, bg='#181f30')
         config_frame.pack(pady=(0, 10))
         
-        config_info = tk.Label(config_frame, 
-                              text=f"Configurações: Mem. Principal: {TAMANHO_MEMORIA_P}KB | "
-                                   f"Página/Quadro: {TAMANHO_PAGINA_QUADRO}B | "
-                                   f"TLB: {NUMERO_LINHAS_TLB} linhas | "
-                                   f"Política: {'LRU' if POLITICA_SUB == 0 else 'Relógio'}",
-                              font=('Arial', 9), bg='#181f30', fg='#a0aec0')
+        config_info_text = f"Configurações: Mem. Principal: {TAMANHO_MEMORIA_PRINCIPAL_STR} | "
+        config_info_text += f"Página/Quadro: {TAMANHO_PAGINA_QUADRO_STR} | "
+        config_info_text += f"TLB: {NUMERO_LINHAS_TLB} linhas | "
+        config_info_text += f"Política: {POLITICA_SUB.value}"
+        
+        config_info = tk.Label(config_frame, text=config_info_text, font=('Arial', 9), bg='#181f30', fg='#a0aec0')
         config_info.pack()
         
-        # Botão voltar para página inicial
         if self.controller:
             btn_home = tk.Button(bottom_frame, text="← Voltar ao Menu", 
-                               command=lambda: self.controller.show_page("ui_pagina_inicial.py"),
+                               command=lambda: self.controller.show_page("ui_pagina_inicial.py") if self.controller else None,
                                font=('Arial', 10), bg='#2d3748', fg='white',
                                relief='flat', padx=15, pady=5)
             btn_home.pack(anchor='w', pady=(10, 0))
@@ -246,14 +251,31 @@ class Tela_Simular(tk.Frame):
         
         self.tree_proc.pack(fill='both', expand=True, padx=5, pady=5)
     
+    def criar_tabela_memoria_secundaria(self, parent):
+        """Cria a tabela de Memória Secundária (páginas em disco)"""
+        frame_ms = tk.LabelFrame(parent, text="Memória Secundária (Páginas em Disco)", 
+                                  font=('Arial', 11, 'bold'), bg='#2d3748', fg='white')
+        frame_ms.pack(fill='both', expand=True, pady=(10, 0))
+        
+        self.tree_ms = ttk.Treeview(frame_ms, columns=('processo', 'pagina'), 
+                                     show='headings', height=4, style="Custom.Treeview")
+        
+        self.tree_ms.heading('processo', text='Processo')
+        self.tree_ms.heading('pagina', text='ID da Página')
+        
+        self.tree_ms.column('processo', width=80, anchor='center')
+        self.tree_ms.column('pagina', width=80, anchor='center')
+        
+        self.tree_ms.pack(fill='both', expand=True, padx=5, pady=5)
+    
     def carregar_comandos_arquivo(self):
         """Carrega comandos do arquivo de teste configurado"""
         try:
-            with open(ARQ_TESTE, "r", encoding="utf-8") as f: 
+            with open(ARQUIVO_TESTE, "r", encoding="utf-8") as f: 
                 self.comandos = [tuple(line.strip().split()) for line in f if line.strip()]
             return True
         except FileNotFoundError:
-            messagebox.showerror("Erro", f"Arquivo de teste '{ARQ_TESTE}' não encontrado.")
+            messagebox.showerror("Erro", f"Arquivo de teste '{ARQUIVO_TESTE}' não encontrado.")
             return False
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao ler o arquivo de teste: {e}")
@@ -344,41 +366,28 @@ class Tela_Simular(tk.Frame):
             return
         
         if tipo_comando == "C":  # Criar processo
-            tamanho, unidade = int(comando[2]), comando[3]
-            if unidade == "KB": 
-                tam_processo = tamanho * 1024
-            elif unidade == "MB": 
-                tam_processo = tamanho * 1024 * 1024
-            else: 
-                tam_processo = tamanho * 1024 * 1024 * 1024
+            tamanho = int(comando[2])
+            unidade = comando[3].upper()
+            tam_processo_bytes = tamanho * MAPA_UNIDADES[unidade]
             
-            novo_processo = Processo(id_processo, tam_processo)
+            novo_processo = Processo(id_processo, tam_processo_bytes)
             self.processos_lista.append(novo_processo)
-            novo_processo.estado = "P"
+            novo_processo.estado = "Pronto"
             
-        elif tipo_comando in ["R", "P", "W"]:  # Acesso à memória
-            # Extrair endereço virtual
-            match = re.search(r'\((\d+)\)', comando[2])
-            if match:
-                endereco_virtual = int(match.group(1))
-            else:
-                try:
-                    endereco_virtual = int(comando[2])
-                except ValueError:
-                    print(f"Erro: Formato de endereço inválido no comando: {' '.join(comando)}")
-                    return
+        elif processo_atual and self.mp and self.tlb: # Garante que a simulação foi iniciada
+            if tipo_comando in ["R", "P", "W"]:
+                match = re.search(r'\((\d+)\)', comando[2])
+                addr = int(match.group(1)) if match else int(comando[2])
+                tratar_acesso_memoria(processo_atual, addr, self.tlb, self.mp, tipo_comando, self.processos_lista)
             
-            # Usar a função tratar_acesso_memoria do main.py
-            tratar_acesso_memoria(processo_atual, endereco_virtual, self.tlb, 
-                                self.mp, tipo_comando, self.processos_lista)
+            elif tipo_comando == "I":
+                processo_atual.estado = "Bloqueado"
             
-        elif tipo_comando == "I":  # I/O
-            processo_atual.estado = "B"
-            
-        elif tipo_comando == "T":  # Terminar processo
-            processo_atual.estado = "F"
-            self.tlb.invalidar_processo(id_processo)
-            self.processos_lista.remove(processo_atual)
+            elif tipo_comando == "T":
+                processo_atual.estado = "Finalizado"
+                if self.tlb:
+                    self.tlb.invalidar_processo(id_processo)
+                self.processos_lista = [p for p in self.processos_lista if p.id != id_processo]
     
     def voltar_ciclo(self):
         """Volta para o ciclo anterior (reinicia a simulação até o ciclo anterior)"""
@@ -441,33 +450,43 @@ class Tela_Simular(tk.Frame):
         # Atualizar tabela TLB
         self.tree_tlb.delete(*self.tree_tlb.get_children())
         if self.tlb:
-            for (id_proc, vpn), entrada in self.tlb.entradas.items():
-                self.tree_tlb.insert('', 'end', values=(f"P{id_proc}", vpn, entrada.numeroFrameFisico))
+            for entrada in self.tlb.entradas:
+                self.tree_tlb.insert('', 'end', values=(f"P{entrada.id_processo}", entrada.num_pagina_virtual, entrada.num_quadro))
         
         # Atualizar tabela de Memória Principal
         self.tree_mp.delete(*self.tree_mp.get_children())
         if self.mp:
             for quadro in self.mp.quadros:
-                if quadro.pagina:
+                if quadro.ocupado and quadro.pagina:
                     mod_str = "Sim" if quadro.pagina.modificada else "Não"
                     self.tree_mp.insert('', 'end', values=(
-                        quadro.idQuadro, f"P{quadro.pagina.idProcesso}", 
-                        quadro.pagina.idPagina, mod_str
+                        quadro.id_quadro, f"P{quadro.pagina.id_processo}", 
+                        quadro.pagina.id_pagina, mod_str
                     ))
         
         # Atualizar tabela de Processos
         self.tree_proc.delete(*self.tree_proc.get_children())
         for processo in self.processos_lista:
             self.tree_proc.insert('', 'end', values=(
-                f"P{processo.id}", processo.estado, processo.tamanho, processo.quantidadePaginas
+                f"P{processo.id}", processo.estado, processo.tamanho_bytes, processo.quantidade_paginas
             ))
+        
+        # Atualizar tabela de Memória Secundária
+        if hasattr(self, 'tree_ms'):
+            self.tree_ms.delete(*self.tree_ms.get_children())
+            for processo in self.processos_lista:
+                # Iterar sobre a tabela de páginas para encontrar as que não estão presentes
+                for i, entrada_tp in enumerate(processo.tabela_paginas.entradas):
+                    if not entrada_tp.bit_presenca:
+                        self.tree_ms.insert('', 'end', values=(f"P{processo.id}", i))
         
         # Atualizar estatísticas da TLB
         if self.tlb:
-            stats = self.tlb.obterEstatisticas()
-            self.label_acertos.config(text=f"Acertos: {stats.get('acertos', 0)}")
-            self.label_falhas.config(text=f"Falhas: {stats.get('falhas', 0)}")
-            self.label_taxa.config(text=f"Taxa de Acerto: {stats.get('taxaAcertos', 0):.1f}%")
+            total_acessos = self.tlb.hits + self.tlb.misses
+            taxa_acerto = (self.tlb.hits / total_acessos * 100) if total_acessos > 0 else 0
+            self.label_acertos.config(text=f"Acertos: {self.tlb.hits}")
+            self.label_falhas.config(text=f"Falhas: {self.tlb.misses}")
+            self.label_taxa.config(text=f"Taxa de Acerto: {taxa_acerto:.1f}%")
     
     def reset_simulacao(self):
         """Reseta completamente a simulação"""
@@ -483,6 +502,8 @@ class Tela_Simular(tk.Frame):
         self.tree_tlb.delete(*self.tree_tlb.get_children())
         self.tree_mp.delete(*self.tree_mp.get_children())
         self.tree_proc.delete(*self.tree_proc.get_children())
+        if hasattr(self, 'tree_ms'):
+            self.tree_ms.delete(*self.tree_ms.get_children())
         
         # Resetar labels informativos
         self.label_ciclo.config(text="Ciclo: 0")
