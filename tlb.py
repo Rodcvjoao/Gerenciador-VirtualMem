@@ -1,83 +1,96 @@
-from collections import OrderedDict
+from collections import deque
 from config import NUMERO_LINHAS_TLB
 
 class EntradaTLB:
-    def __init__(self, numeroPaginaVirtual, numeroFrameFisico, idProcesso):
-        self.numeroPaginaVirtual = numeroPaginaVirtual
-        self.numeroFrameFisico = numeroFrameFisico
-        self.idProcesso = idProcesso
-        self.valido = True
+    """
+    Representa uma única entrada na Translation Lookaside Buffer (TLB).
+    Armazena um mapeamento de página virtual para quadro físico para um processo.
+    """
+    def __init__(self, id_processo: int, num_pagina_virtual: int, num_quadro: int):
+        self.id_processo = id_processo
+        self.num_pagina_virtual = num_pagina_virtual
+        self.num_quadro = num_quadro
 
 class TLB:
-    def __init__(self, tamanho=None):
-        self.tamanho = tamanho if tamanho is not None else NUMERO_LINHAS_TLB
-        self.entradas = OrderedDict()
-        self.acertos = 0
-        self.falhas = 0
+    """
+    Implementa a Translation Lookaside Buffer (TLB), um cache para traduções de endereço.
+    Utiliza uma política de substituição FIFO (First-In, First-Out).
+    """
+    def __init__(self):
+        # A capacidade da TLB é definida no arquivo de configuração.
+        self.capacidade = NUMERO_LINHAS_TLB
+        # Usamos um 'deque' como uma fila para gerenciar as entradas da TLB de forma eficiente.
+        self.entradas = deque(maxlen=self.capacidade)
+        # Contadores para estatísticas de desempenho.
+        self.hits = 0
+        self.misses = 0
 
-    def buscar(self, idProcesso, numeroPaginaVirtual):
-        chave = (idProcesso, numeroPaginaVirtual)
-        if chave in self.entradas:
-            self.entradas.move_to_end(chave) # LRU: Mover para o fim (mais recente)
-            self.acertos += 1
-            return self.entradas[chave].numeroFrameFisico
-        self.falhas += 1
+    def consultar(self, id_processo: int, num_pagina_virtual: int) -> int | None:
+        """
+        Consulta a TLB para encontrar um quadro físico para uma dada página virtual de um processo.
+        Retorna o número do quadro se encontrado (TLB hit), ou None caso contrário (TLB miss).
+        """
+        for entrada in self.entradas:
+            if entrada.id_processo == id_processo and entrada.num_pagina_virtual == num_pagina_virtual:
+                return entrada.num_quadro
         return None
 
-    def inserir(self, idProcesso, numeroPaginaVirtual, numeroFrameFisico):
-        chave = (idProcesso, numeroPaginaVirtual)
-        if chave in self.entradas:
-            self.entradas.pop(chave)
-        elif len(self.entradas) >= self.tamanho:
-            self.entradas.popitem(last=False)
+    def inserir(self, id_processo: int, num_pagina_virtual: int, num_quadro: int):
+        """
+        Insere uma nova tradução na TLB.
+        Se a TLB estiver cheia, a entrada mais antiga (FIFO) é removida.
+        """
+        # Verifica se a entrada já existe para evitar duplicatas.
+        for entrada in self.entradas:
+            if entrada.id_processo == id_processo and entrada.num_pagina_virtual == num_pagina_virtual:
+                # Se já existe, move para o final para uma política LRU, ou simplesmente retorna para FIFO.
+                # Para FIFO, não fazemos nada se já existir. Se quiser LRU na TLB, precisa mover.
+                return
+
+        nova_entrada = EntradaTLB(id_processo, num_pagina_virtual, num_quadro)
         
-        self.entradas[chave] = EntradaTLB(numeroPaginaVirtual, numeroFrameFisico, idProcesso)
+        # O deque com maxlen=N remove automaticamente o item mais antigo quando está cheio.
+        self.entradas.append(nova_entrada)
 
-    def invalidar_tudo(self):
-        """Invalida todas as entradas da TLB, limpando completamente a estrutura."""
-        self.entradas.clear()
-        print("TLB: Todas as entradas foram invalidadas!")
-
-   
-    def invalidar_entrada(self, idProcesso, numeroPaginaVirtual):
+    def invalidar_processo(self, id_processo: int):
         """
-        Invalida uma entrada específica da TLB (usado em substituição de página).
+        Remove todas as entradas da TLB associadas a um processo que foi finalizado.
         """
-        chave = (idProcesso, numeroPaginaVirtual)
-        if chave in self.entradas:
-            del self.entradas[chave]
+        # Cria uma nova lista contendo apenas as entradas que NÃO pertencem ao processo invalidado.
+        entradas_a_manter = [e for e in self.entradas if e.id_processo != id_processo]
+        self.entradas = deque(entradas_a_manter, maxlen=self.capacidade)
+        print(f"TLB: Entradas do processo P{id_processo} invalidadas.")
 
-    def invalidar_processo(self, idProcesso):
+    def invalidar_entrada(self, id_processo: int, num_pagina_virtual: int):
         """
-        Invalida todas as entradas de um processo específico (usado ao terminar um processo).
+        Remove uma entrada específica da TLB. Usado quando uma página é substituída na memória principal.
         """
-        # Cria uma lista de chaves para remover para não modificar o dicionário enquanto itera
-        chaves_para_remover = [k for k in self.entradas if k[0] == idProcesso]
-        for chave in chaves_para_remover:
-            del self.entradas[chave]
-            print(f"TLB: Entrada {chave} invalidada.")
-
-    
-
-
-    def obterEstatisticas(self):
-        total = self.acertos + self.falhas
-        taxaAcertos = (self.acertos / total * 100) if total > 0 else 0
-        return {
-            'acertos': self.acertos,
-            'falhas': self.falhas,
-            'total': total,
-            'taxaAcertos': taxaAcertos
-        }
+        entrada_para_remover = None
+        for entrada in self.entradas:
+            if entrada.id_processo == id_processo and entrada.num_pagina_virtual == num_pagina_virtual:
+                entrada_para_remover = entrada
+                break
+        
+        if entrada_para_remover:
+            self.entradas.remove(entrada_para_remover)
 
     def print_estado(self):
+        """
+        Imprime o estado atual da TLB, incluindo suas entradas e estatísticas.
+        """
         print("\n--- Estado da TLB ---")
         if not self.entradas:
             print("  TLB está vazia.")
         else:
-            print("  [ID Proc, VPN] -> PFN")
-            for (idProc, vpn), entrada in self.entradas.items():
-                print(f"  [{idProc}, {vpn}] -> {entrada.numeroFrameFisico}")
+            print("  Entradas Atuais:")
+            for i, entrada in enumerate(self.entradas):
+                print(f"    [{i}] -> Processo P{entrada.id_processo}, Página {entrada.num_pagina_virtual} -> Quadro {entrada.num_quadro}")
         
-        stats = self.obterEstatisticas()
-        print(f"  Estatísticas: {stats['acertos']} acertos, {stats['falhas']} falhas | Taxa de Acerto: {stats['taxaAcertos']:.2f}%")
+        total_acessos = self.hits + self.misses
+        taxa_hit = (self.hits / total_acessos * 100) if total_acessos > 0 else 0
+        
+        print("\n  Estatísticas:")
+        print(f"    - Hits: {self.hits}")
+        print(f"    - Misses: {self.misses}")
+        print(f"    - Taxa de Acerto (Hit Rate): {taxa_hit:.2f}%")
+        print("--------------------")
