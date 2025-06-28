@@ -22,6 +22,11 @@ class Tela_Simular(tk.Frame):
         self.controller = controller
         self.configure(bg='#181f30')
         
+        # Configurar tamanho fixo da janela
+        if parent.winfo_toplevel():
+            parent.winfo_toplevel().geometry('700x500')
+            parent.winfo_toplevel().resizable(False, False)
+        
         # Variáveis da simulação
         self.mp: MemoriaPrincipal | None = None
         self.tlb: TLB | None = None
@@ -34,151 +39,143 @@ class Tela_Simular(tk.Frame):
         self.criar_interface()
         
     def criar_interface(self):
-        """Cria todos os elementos da interface"""
-        # Frame principal
-        main_frame = tk.Frame(self, bg='#181f30')
-        main_frame.pack(fill='both', expand=True, padx=10, pady=10)
+        """Cria todos os elementos da interface para tela 700x500"""
+        # Frame principal com tamanho fixo
+        main_frame = tk.Frame(self, bg='#181f30', width=700, height=500)
+        main_frame.pack_propagate(False)  # Impede redimensionamento automático
+        main_frame.pack(fill='both', expand=True)
         
-        # Título
-        titulo = tk.Label(main_frame, text="Simulador de Gerenciamento de Memória", 
-                         font=('Arial', 16, 'bold'), bg='#181f30', fg='white')
-        titulo.pack(pady=(0, 10))
+        # Header compacto (60px)
+        header_frame = tk.Frame(main_frame, bg='#181f30', height=60)
+        header_frame.pack(fill='x', padx=5, pady=2)
+        header_frame.pack_propagate(False)
         
-        # Frame superior (controles e informações)
-        top_frame = tk.Frame(main_frame, bg='#181f30')
-        top_frame.pack(fill='x', pady=(0, 10))
+        # Título e controles na mesma linha
+        tk.Label(header_frame, text="Simulador de Memória", 
+                font=('Arial', 14, 'bold'), bg='#181f30', fg='white').pack(side='left', pady=5)
         
-        # Botões de controle
-        controles_frame = tk.Frame(top_frame, bg='#181f30')
-        controles_frame.pack(side='left')
+        # Controles à direita
+        controles_frame = tk.Frame(header_frame, bg='#181f30')
+        controles_frame.pack(side='right', pady=5)
         
-        btn_iniciar = tk.Button(controles_frame, text="Iniciar Simulação", 
+        btn_iniciar = tk.Button(controles_frame, text="Iniciar", 
                                command=self.iniciar_simulacao,
-                               font=('Arial', 12), bg='#38a169', fg='white',
-                               relief='flat', padx=20, pady=8)
-        btn_iniciar.pack(side='left', padx=(0, 10))
+                               font=('Arial', 9), bg='#38a169', fg='white',
+                               relief='flat', padx=10, pady=4)
+        btn_iniciar.pack(side='left', padx=2)
         
         btn_reset = tk.Button(controles_frame, text="Reset", 
                             command=self.reset_simulacao,
-                            font=('Arial', 12), bg='#e53e3e', fg='white',
-                            relief='flat', padx=20, pady=8)
-        btn_reset.pack(side='left')
+                            font=('Arial', 9), bg='#e53e3e', fg='white',
+                            relief='flat', padx=10, pady=4)
+        btn_reset.pack(side='left', padx=2)
         
-        # Informações do ciclo atual
-        info_frame = tk.Frame(top_frame, bg='#181f30')
-        info_frame.pack(side='right')
-        
-        self.label_arquivo = tk.Label(info_frame, text=f"Arquivo: {ARQ_TESTE}", 
-                                    font=('Arial', 10), bg='#181f30', fg='#a0aec0')
-        self.label_arquivo.pack(anchor='e')
+        # Info do ciclo
+        info_frame = tk.Frame(header_frame, bg='#181f30')
+        info_frame.pack(side='right', padx=10)
         
         self.label_ciclo = tk.Label(info_frame, text=f"Ciclo: {self.ciclo_atual}", 
-                                   font=('Arial', 12, 'bold'), bg='#181f30', fg='white')
-        self.label_ciclo.pack(anchor='e')
+                                   font=('Arial', 11, 'bold'), bg='#181f30', fg='white')
+        self.label_ciclo.pack()
         
-        self.label_comando = tk.Label(info_frame, text="Comando atual: -", 
-                                    font=('Arial', 10), bg='#181f30', fg='#a0aec0')
-        self.label_comando.pack(anchor='e')
+        # Estatísticas em linha horizontal (30px)
+        stats_frame = tk.Frame(main_frame, bg='#2d3748', height=30)
+        stats_frame.pack(fill='x', padx=5, pady=2)
+        stats_frame.pack_propagate(False)
         
-        # Frame central (tabelas)
-        central_frame = tk.Frame(main_frame, bg='#181f30')
-        central_frame.pack(fill='both', expand=True, pady=(0, 10))
+        tk.Label(stats_frame, text="Estatísticas TLB:", font=('Arial', 9, 'bold'), 
+                bg='#2d3748', fg='white').pack(side='left', padx=5)
         
-        # Frame esquerdo (TLB e Estatísticas)
-        left_frame = tk.Frame(central_frame, bg='#181f30')
-        left_frame.pack(side='left', fill='both', expand=True, padx=(0, 5))
+        self.label_acertos = tk.Label(stats_frame, text="Acertos: 0", font=('Arial', 9), 
+                                     bg='#2d3748', fg='#68d391')
+        self.label_acertos.pack(side='left', padx=10)
         
-        # TLB
-        self.criar_tabela_tlb(left_frame)
+        self.label_falhas = tk.Label(stats_frame, text="Falhas: 0", font=('Arial', 9), 
+                                    bg='#2d3748', fg='#f56565')
+        self.label_falhas.pack(side='left', padx=10)
         
-        # Estatísticas
-        self.criar_frame_estatisticas(left_frame)
+        self.label_taxa = tk.Label(stats_frame, text="Taxa: 0%", font=('Arial', 9), 
+                                  bg='#2d3748', fg='#63b3ed')
+        self.label_taxa.pack(side='left', padx=10)
         
-        # Frame direito (Memórias)
-        right_frame = tk.Frame(central_frame, bg='#181f30')
-        right_frame.pack(side='left', fill='both', expand=True, padx=(5, 0))
+        # Controles de navegação na mesma linha das estatísticas
+        nav_frame = tk.Frame(stats_frame, bg='#2d3748')
+        nav_frame.pack(side='right', padx=5)
         
-        # Memória Principal
-        self.criar_tabela_memoria_principal(right_frame)
+        self.btn_voltar = tk.Button(nav_frame, text="◀", command=self.voltar_ciclo,
+                                   font=('Arial', 8, 'bold'), bg='#4299e1', fg='white',
+                                   width=3, relief='flat', state='disabled')
+        self.btn_voltar.pack(side='left', padx=1)
         
-        # Processos Ativos
-        self.criar_tabela_processos(right_frame)
+        self.btn_proximo = tk.Button(nav_frame, text="▶", command=self.executar_proximo_ciclo,
+                                    font=('Arial', 8, 'bold'), bg='#38a169', fg='white',
+                                    width=3, relief='flat', state='disabled')
+        self.btn_proximo.pack(side='left', padx=1)
         
-        # Memória Secundária
-        self.criar_tabela_memoria_secundaria(right_frame)
+        # Área principal das tabelas (360px)
+        tabelas_frame = tk.Frame(main_frame, bg='#181f30', height=360)
+        tabelas_frame.pack(fill='both', expand=True, padx=5, pady=2)
+        tabelas_frame.pack_propagate(False)
         
-        # Frame inferior (botões de navegação e configurações)
-        bottom_frame = tk.Frame(main_frame, bg='#181f30')
-        bottom_frame.pack(fill='x', pady=(10, 0))
+        # Dividir em duas colunas
+        # Coluna esquerda (340px)
+        left_frame = tk.Frame(tabelas_frame, bg='#181f30', width=340)
+        left_frame.pack(side='left', fill='y', padx=(0, 2))
+        left_frame.pack_propagate(False)
         
-        # Botões de navegação - DESTACADOS
-        nav_frame = tk.Frame(bottom_frame, bg='#2d3748', relief='raised', bd=2)
-        nav_frame.pack(pady=(0, 15), padx=50, fill='x')
+        # TLB (180px)
+        self.criar_tabela_tlb(left_frame, height=180)
         
-        nav_title = tk.Label(nav_frame, text="Controle de Execução", 
-                            font=('Arial', 12, 'bold'), bg='#2d3748', fg='white')
-        nav_title.pack(pady=(10, 5))
+        # Processos Ativos (175px)
+        self.criar_tabela_processos(left_frame, height=175)
         
-        buttons_frame = tk.Frame(nav_frame, bg='#2d3748')
-        buttons_frame.pack(pady=(0, 10))
+        # Coluna direita (340px)
+        right_frame = tk.Frame(tabelas_frame, bg='#181f30', width=340)
+        right_frame.pack(side='right', fill='y', padx=(2, 0))
+        right_frame.pack_propagate(False)
         
-        self.btn_voltar = tk.Button(buttons_frame, text="◀ Voltar", 
-                                   command=self.voltar_ciclo,
-                                   font=('Arial', 12, 'bold'), bg='#4299e1', fg='white',
-                                   width=12, height=2, relief='flat', state='disabled')
-        self.btn_voltar.pack(side='left', padx=(0, 20))
+        # Memória Principal (180px)
+        self.criar_tabela_memoria_principal(right_frame, height=180)
         
-        self.label_ciclo_nav = tk.Label(buttons_frame, text=f"Ciclo {self.ciclo_atual}", 
-                                       font=('Arial', 16, 'bold'), bg='#2d3748', fg='white')
-        self.label_ciclo_nav.pack(side='left', padx=30)
+        # Memória Secundária (175px)
+        self.criar_tabela_memoria_secundaria(right_frame, height=175)
         
-        self.btn_proximo = tk.Button(buttons_frame, text="Próximo ▶", 
-                                    command=self.executar_proximo_ciclo,
-                                    font=('Arial', 12, 'bold'), bg='#38a169', fg='white',
-                                    width=12, height=2, relief='flat', state='disabled')
-        self.btn_proximo.pack(side='left', padx=(20, 0))
+        # Footer compacto (40px)
+        footer_frame = tk.Frame(main_frame, bg='#181f30', height=40)
+        footer_frame.pack(fill='x', padx=5, pady=2)
+        footer_frame.pack_propagate(False)
         
-        # Status da simulação
-        self.label_status = tk.Label(nav_frame, text="Status: Aguardando início", 
-                                    font=('Arial', 10), bg='#2d3748', fg='#a0aec0')
-        self.label_status.pack(pady=(0, 10))
+        # Status
+        self.label_status = tk.Label(footer_frame, text="Status: Aguardando início", 
+                                    font=('Arial', 9), bg='#181f30', fg='#a0aec0')
+        self.label_status.pack(side='left', pady=5)
         
-        # Informações de configuração
-        config_frame = tk.Frame(bottom_frame, bg='#181f30')
-        config_frame.pack(pady=(0, 10))
-        
-        config_info_text = f"Configurações: Mem. Principal: {TAM_MEM_PRINCIPAL} | "
-        config_info_text += f"Página/Quadro: {TAM_PAGINA_QUADRO} | "
-        config_info_text += f"TLB: {NUM_LINHAS_TLB} linhas | "
-        config_info_text += f"Política: {POLITICA_SUBST}"
-        
-        config_info = tk.Label(config_frame, text=config_info_text, font=('Arial', 9), bg='#181f30', fg='#a0aec0')
-        config_info.pack()
-        
+        # Botão home
         if self.controller:
-            btn_home = tk.Button(bottom_frame, text="← Voltar ao Menu", 
+            btn_home = tk.Button(footer_frame, text="← Menu", 
                                command=lambda: self.controller.show_page("ui_pagina_inicial.py") if self.controller else None,
-                               font=('Arial', 10), bg='#2d3748', fg='white',
-                               relief='flat', padx=15, pady=5)
-            btn_home.pack(anchor='w', pady=(10, 0))
+                               font=('Arial', 8), bg='#2d3748', fg='white',
+                               relief='flat', padx=10, pady=3)
+            btn_home.pack(side='right', pady=5)
     
-    def criar_tabela_tlb(self, parent):
-        """Cria a tabela TLB"""
-        frame_tlb = tk.LabelFrame(parent, text="TLB (Translation Lookaside Buffer)", 
-                                 font=('Arial', 11, 'bold'), bg='#2d3748', fg='white')
-        frame_tlb.pack(fill='both', expand=True, pady=(0, 10))
+    def criar_tabela_tlb(self, parent, height):
+        """Cria a tabela TLB compacta"""
+        frame_tlb = tk.LabelFrame(parent, text="TLB", font=('Arial', 10, 'bold'), 
+                                 bg='#2d3748', fg='white', height=height)
+        frame_tlb.pack(fill='x', pady=(0, 5))
+        frame_tlb.pack_propagate(False)
         
         # Estilo para treeview
         style = ttk.Style()
         style.theme_use('clam')
         style.configure("Custom.Treeview", background="#4a5568", foreground="white", 
-                       fieldbackground="#4a5568", borderwidth=0)
-        style.configure("Custom.Treeview.Heading", background="#2d3748", foreground="white")
+                       fieldbackground="#4a5568", borderwidth=0, rowheight=20)
+        style.configure("Custom.Treeview.Heading", background="#2d3748", foreground="white", font=('Arial', 8))
         
         self.tree_tlb = ttk.Treeview(frame_tlb, columns=('processo', 'vpn', 'pfn'), 
-                                    show='headings', height=6, style="Custom.Treeview")
+                                    show='headings', height=7, style="Custom.Treeview")
         
-        self.tree_tlb.heading('processo', text='Processo')
+        self.tree_tlb.heading('processo', text='Proc')
         self.tree_tlb.heading('vpn', text='VPN')
         self.tree_tlb.heading('pfn', text='PFN')
         
@@ -186,87 +183,69 @@ class Tela_Simular(tk.Frame):
         self.tree_tlb.column('vpn', width=80, anchor='center')
         self.tree_tlb.column('pfn', width=80, anchor='center')
         
-        self.tree_tlb.pack(fill='both', expand=True, padx=5, pady=5)
+        self.tree_tlb.pack(fill='both', expand=True, padx=3, pady=3)
     
-    def criar_frame_estatisticas(self, parent):
-        """Cria o frame de estatísticas"""
-        frame_stats = tk.LabelFrame(parent, text="Estatísticas da TLB", 
-                                   font=('Arial', 11, 'bold'), bg='#2d3748', fg='white')
-        frame_stats.pack(fill='x', pady=(0, 10))
+    def criar_tabela_memoria_principal(self, parent, height):
+        """Cria a tabela de Memória Principal compacta"""
+        frame_mp = tk.LabelFrame(parent, text="Memória Principal", font=('Arial', 10, 'bold'), 
+                                bg='#2d3748', fg='white', height=height)
+        frame_mp.pack(fill='x', pady=(0, 5))
+        frame_mp.pack_propagate(False)
         
-        stats_content = tk.Frame(frame_stats, bg='#2d3748')
-        stats_content.pack(fill='both', expand=True, padx=10, pady=10)
-        
-        self.label_acertos = tk.Label(stats_content, text="Acertos: 0", 
-                                     font=('Arial', 11), bg='#2d3748', fg='#68d391')
-        self.label_acertos.pack(anchor='w', pady=2)
-        
-        self.label_falhas = tk.Label(stats_content, text="Falhas: 0", 
-                                    font=('Arial', 11), bg='#2d3748', fg='#f56565')
-        self.label_falhas.pack(anchor='w', pady=2)
-        
-        self.label_taxa = tk.Label(stats_content, text="Taxa de Acerto: 0%", 
-                                  font=('Arial', 11), bg='#2d3748', fg='#63b3ed')
-        self.label_taxa.pack(anchor='w', pady=2)
-    
-    def criar_tabela_memoria_principal(self, parent):
-        """Cria a tabela de Memória Principal"""
-        frame_mp = tk.LabelFrame(parent, text="Memória Principal", 
-                                font=('Arial', 11, 'bold'), bg='#2d3748', fg='white')
-        frame_mp.pack(fill='both', expand=True, pady=(0, 10))
-        
-        self.tree_mp = ttk.Treeview(frame_mp, columns=('quadro', 'processo', 'pagina', 'modificada'), 
-                                   show='headings', height=8, style="Custom.Treeview")
+        self.tree_mp = ttk.Treeview(frame_mp, columns=('quadro', 'processo', 'pagina', 'mod'), 
+                                   show='headings', height=7, style="Custom.Treeview")
         
         self.tree_mp.heading('quadro', text='Quadro')
-        self.tree_mp.heading('processo', text='Processo')
-        self.tree_mp.heading('pagina', text='Página')
-        self.tree_mp.heading('modificada', text='Mod.')
+        self.tree_mp.heading('processo', text='Proc')
+        self.tree_mp.heading('pagina', text='Pág')
+        self.tree_mp.heading('mod', text='Mod')
         
         self.tree_mp.column('quadro', width=60, anchor='center')
-        self.tree_mp.column('processo', width=70, anchor='center')
-        self.tree_mp.column('pagina', width=60, anchor='center')
-        self.tree_mp.column('modificada', width=50, anchor='center')
+        self.tree_mp.column('processo', width=60, anchor='center')
+        self.tree_mp.column('pagina', width=50, anchor='center')
+        self.tree_mp.column('mod', width=40, anchor='center')
         
-        self.tree_mp.pack(fill='both', expand=True, padx=5, pady=5)
+        self.tree_mp.pack(fill='both', expand=True, padx=3, pady=3)
     
-    def criar_tabela_processos(self, parent):
-        """Cria a tabela de Processos Ativos"""
-        frame_proc = tk.LabelFrame(parent, text="Processos Ativos", 
-                                  font=('Arial', 11, 'bold'), bg='#2d3748', fg='white')
+    def criar_tabela_processos(self, parent, height):
+        """Cria a tabela de Processos Ativos compacta"""
+        frame_proc = tk.LabelFrame(parent, text="Processos", font=('Arial', 10, 'bold'), 
+                                  bg='#2d3748', fg='white', height=height)
         frame_proc.pack(fill='both', expand=True)
+        frame_proc.pack_propagate(False)
         
-        self.tree_proc = ttk.Treeview(frame_proc, columns=('id', 'estado', 'tamanho', 'paginas'), 
-                                     show='headings', height=6, style="Custom.Treeview")
+        self.tree_proc = ttk.Treeview(frame_proc, columns=('id', 'estado', 'tam', 'pags'), 
+                                     show='headings', height=7, style="Custom.Treeview")
         
         self.tree_proc.heading('id', text='ID')
         self.tree_proc.heading('estado', text='Estado')
-        self.tree_proc.heading('tamanho', text='Tamanho (B)')
-        self.tree_proc.heading('paginas', text='Páginas')
+        self.tree_proc.heading('tam', text='Tam(B)')
+        self.tree_proc.heading('pags', text='Págs')
         
         self.tree_proc.column('id', width=40, anchor='center')
-        self.tree_proc.column('estado', width=60, anchor='center')
-        self.tree_proc.column('tamanho', width=80, anchor='center')
-        self.tree_proc.column('paginas', width=60, anchor='center')
+        self.tree_proc.column('estado', width=80, anchor='center')
+        self.tree_proc.column('tam', width=80, anchor='center')
+        self.tree_proc.column('pags', width=50, anchor='center')
         
-        self.tree_proc.pack(fill='both', expand=True, padx=5, pady=5)
+        self.tree_proc.pack(fill='both', expand=True, padx=3, pady=3)
     
-    def criar_tabela_memoria_secundaria(self, parent):
-        """Cria a tabela de Memória Secundária (páginas em disco)"""
-        frame_ms = tk.LabelFrame(parent, text="Memória Secundária (Páginas em Disco)", 
-                                  font=('Arial', 11, 'bold'), bg='#2d3748', fg='white')
-        frame_ms.pack(fill='both', expand=True, pady=(10, 0))
+    def criar_tabela_memoria_secundaria(self, parent, height):
+        """Cria a tabela de Memória Secundária compacta"""
+        frame_ms = tk.LabelFrame(parent, text="Memória Secundária", font=('Arial', 10, 'bold'), 
+                                bg='#2d3748', fg='white', height=height)
+        frame_ms.pack(fill='both', expand=True)
+        frame_ms.pack_propagate(False)
         
         self.tree_ms = ttk.Treeview(frame_ms, columns=('processo', 'pagina'), 
-                                     show='headings', height=4, style="Custom.Treeview")
+                                   show='headings', height=7, style="Custom.Treeview")
         
         self.tree_ms.heading('processo', text='Processo')
-        self.tree_ms.heading('pagina', text='ID da Página')
+        self.tree_ms.heading('pagina', text='Página')
         
-        self.tree_ms.column('processo', width=80, anchor='center')
-        self.tree_ms.column('pagina', width=80, anchor='center')
+        self.tree_ms.column('processo', width=100, anchor='center')
+        self.tree_ms.column('pagina', width=100, anchor='center')
         
-        self.tree_ms.pack(fill='both', expand=True, padx=5, pady=5)
+        self.tree_ms.pack(fill='both', expand=True, padx=3, pady=3)
     
     def carregar_comandos_arquivo(self):
         """Carrega comandos do arquivo de teste configurado"""
@@ -296,18 +275,16 @@ class Tela_Simular(tk.Frame):
             
             # Atualizar interface
             self.atualizar_interface()
-            self.label_status.config(text=f"Status: Pronto - {len(self.comandos)} comandos carregados")
+            self.label_status.config(text=f"Pronto - {len(self.comandos)} comandos")
             
             # Habilitar botão próximo
             self.btn_proximo.config(state='normal')
             
             messagebox.showinfo("Simulação Iniciada", 
-                              f"Simulação inicializada com sucesso!\n"
-                              f"Total de comandos: {len(self.comandos)}\n"
-                              f"Use o botão 'Próximo' para executar os comandos.")
+                              f"Simulação inicializada!\nComandos: {len(self.comandos)}")
             
         except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao inicializar simulação:\n{str(e)}")
+            messagebox.showerror("Erro", f"Erro ao inicializar:\n{str(e)}")
             self.reset_simulacao()
     
     def executar_proximo_ciclo(self):
@@ -317,8 +294,8 @@ class Tela_Simular(tk.Frame):
             return
         
         if self.ciclo_atual >= len(self.comandos):
-            messagebox.showinfo("Fim", "Todos os comandos foram executados!")
-            self.label_status.config(text="Status: Simulação finalizada")
+            messagebox.showinfo("Fim", "Todos os comandos executados!")
+            self.label_status.config(text="Simulação finalizada")
             self.btn_proximo.config(state='disabled')
             return
         
@@ -335,7 +312,7 @@ class Tela_Simular(tk.Frame):
             
             # Atualizar status
             comando_str = ' '.join(comando)
-            self.label_status.config(text=f"Status: Executado - {comando_str}")
+            self.label_status.config(text=f"Executado: {comando_str}")
             
             # Habilitar botão voltar se não estiver no início
             if self.ciclo_atual > 0:
@@ -344,11 +321,11 @@ class Tela_Simular(tk.Frame):
             # Verificar se chegou ao fim
             if self.ciclo_atual >= len(self.comandos):
                 self.btn_proximo.config(state='disabled')
-                self.label_status.config(text="Status: Simulação finalizada")
-                messagebox.showinfo("Concluído", "Simulação finalizada com sucesso!")
+                self.label_status.config(text="Simulação finalizada")
+                messagebox.showinfo("Concluído", "Simulação finalizada!")
             
         except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao executar comando:\n{str(e)}")
+            messagebox.showerror("Erro", f"Erro ao executar:\n{str(e)}")
     
     def executar_comando_individual(self, comando):
         """Executa um comando individual utilizando a lógica do main.py"""
@@ -396,7 +373,7 @@ class Tela_Simular(tk.Frame):
         
         # Confirmar ação
         resposta = messagebox.askyesno("Confirmar", 
-                                     "Voltar um ciclo irá reiniciar a simulação até o ciclo anterior. Continuar?")
+                                     "Voltar um ciclo irá reiniciar a simulação. Continuar?")
         if not resposta:
             return
         
@@ -428,24 +405,16 @@ class Tela_Simular(tk.Frame):
             if self.ciclo_atual <= 0:
                 self.btn_voltar.config(state='disabled')
             
-            self.label_status.config(text=f"Status: Voltou para ciclo {self.ciclo_atual}")
+            self.label_status.config(text=f"Voltou para ciclo {self.ciclo_atual}")
             
         except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao voltar ciclo:\n{str(e)}")
+            messagebox.showerror("Erro", f"Erro ao voltar:\n{str(e)}")
             self.reset_simulacao()
     
     def atualizar_interface(self):
         """Atualiza a interface com o estado atual do sistema"""
         # Atualizar labels de informação
         self.label_ciclo.config(text=f"Ciclo: {self.ciclo_atual}")
-        self.label_ciclo_nav.config(text=f"Ciclo {self.ciclo_atual}")
-        
-        # Mostrar próximo comando se existir
-        if self.ciclo_atual < len(self.comandos):
-            proximo_comando = ' '.join(self.comandos[self.ciclo_atual])
-            self.label_comando.config(text=f"Próximo: {proximo_comando}")
-        else:
-            self.label_comando.config(text="Comando: Simulação finalizada")
         
         # Atualizar tabela TLB
         self.tree_tlb.delete(*self.tree_tlb.get_children())
@@ -458,7 +427,7 @@ class Tela_Simular(tk.Frame):
         if self.mp:
             for quadro in self.mp.quadros:
                 if quadro.ocupado and quadro.pagina:
-                    mod_str = "Sim" if quadro.pagina.modificada else "Não"
+                    mod_str = "S" if quadro.pagina.modificada else "N"
                     self.tree_mp.insert('', 'end', values=(
                         quadro.id_quadro, f"P{quadro.pagina.id_processo}", 
                         quadro.pagina.id_pagina, mod_str
@@ -472,13 +441,12 @@ class Tela_Simular(tk.Frame):
             ))
         
         # Atualizar tabela de Memória Secundária
-        if hasattr(self, 'tree_ms'):
-            self.tree_ms.delete(*self.tree_ms.get_children())
-            for processo in self.processos_lista:
-                # Iterar sobre a tabela de páginas para encontrar as que não estão presentes
-                for i, entrada_tp in enumerate(processo.tabela_paginas.entradas):
-                    if not entrada_tp.bit_presenca:
-                        self.tree_ms.insert('', 'end', values=(f"P{processo.id}", i))
+        self.tree_ms.delete(*self.tree_ms.get_children())
+        for processo in self.processos_lista:
+            # Iterar sobre a tabela de páginas para encontrar as que não estão presentes
+            for i, entrada_tp in enumerate(processo.tabela_paginas.entradas):
+                if not entrada_tp.bit_presenca:
+                    self.tree_ms.insert('', 'end', values=(f"P{processo.id}", i))
         
         # Atualizar estatísticas da TLB
         if self.tlb:
@@ -486,7 +454,7 @@ class Tela_Simular(tk.Frame):
             taxa_acerto = (self.tlb.hits / total_acessos * 100) if total_acessos > 0 else 0
             self.label_acertos.config(text=f"Acertos: {self.tlb.hits}")
             self.label_falhas.config(text=f"Falhas: {self.tlb.misses}")
-            self.label_taxa.config(text=f"Taxa de Acerto: {taxa_acerto:.1f}%")
+            self.label_taxa.config(text=f"Taxa: {taxa_acerto:.1f}%")
     
     def reset_simulacao(self):
         """Reseta completamente a simulação"""
@@ -502,20 +470,17 @@ class Tela_Simular(tk.Frame):
         self.tree_tlb.delete(*self.tree_tlb.get_children())
         self.tree_mp.delete(*self.tree_mp.get_children())
         self.tree_proc.delete(*self.tree_proc.get_children())
-        if hasattr(self, 'tree_ms'):
-            self.tree_ms.delete(*self.tree_ms.get_children())
+        self.tree_ms.delete(*self.tree_ms.get_children())
         
         # Resetar labels informativos
         self.label_ciclo.config(text="Ciclo: 0")
-        self.label_ciclo_nav.config(text="Ciclo 0")
-        self.label_comando.config(text="Comando: -")
         self.label_acertos.config(text="Acertos: 0")
         self.label_falhas.config(text="Falhas: 0")
-        self.label_taxa.config(text="Taxa de Acerto: 0%")
-        self.label_status.config(text="Status: Aguardando início")
+        self.label_taxa.config(text="Taxa: 0%")
+        self.label_status.config(text="Aguardando início")
         
         # Desabilitar botões de navegação
         self.btn_voltar.config(state='disabled')
         self.btn_proximo.config(state='disabled')
         
-        messagebox.showinfo("Reset", "Simulação resetada com sucesso!")
+        messagebox.showinfo("Reset", "Simulação resetada!")

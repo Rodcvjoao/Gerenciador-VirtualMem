@@ -82,7 +82,7 @@ class Tela_Configurar(t.Frame):
         self.unidade_memoriap_combobox.set("KB - KiloBytes")
         self.unidade_memorias_combobox.set("KB - KiloBytes")
         self.unidade_pagina_combobox.set("KB - KiloBytes")
-        self.politica_subst_combobox.set("Relógio")
+        self.politica_subst_combobox.set("Relogio")
 
 
         t.Label(mainframe, bg='#FFFFFF').grid(column=1, row=0, sticky=t.W, padx=10, pady=5)

@@ -10,7 +10,7 @@ TAM_MEM_PRINCIPAL = "1024"
 TAM_MEM_SECUNDARIA = "64"
 TAM_PAGINA_QUADRO = "16"
 TAM_END_LOGICO = "16"
-NUM_LINHAS_TLB = "8"
+NUM_LINHAS_TLB = "16"
 POLITICA_SUBST = "Relogio"
 
 # Tratamento das strings para inteiros
