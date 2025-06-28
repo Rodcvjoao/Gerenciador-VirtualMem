@@ -77,10 +77,20 @@ class Tela_Configurar(t.Frame):
         t.Label(mainframe, text="Número de Linhas da TLB", bg= '#FFFFFF').grid(column= 3, row= 4, sticky= t.W)
 
 
-        # --- COMBOBOX PARA UNIDADES DE MEMÓRIA ---
+        t.Label(mainframe, text="Política de Substituição", bg= '#FFFFFF').grid(column= 3, row= 7, sticky= t.W)
+
+
+        # --- COMBOBOX PARA UNIDADES DE MEMÓRIA E POLÍTICA DE SUBSTITUIÇÃO
         self.unidade_memoriap_combobox = t.StringVar()
         self.unidade_memorias_combobox = t.StringVar()
         self.unidade_pagina_combobox = t.StringVar()
+        self.politica_subst_combobox = t.StringVar()
+
+        self.unidade_memoriap_combobox.set = "KB - KiloBytes"
+        self.unidade_memorias_combobox.set = "KB - KiloBytes"
+        self.unidade_pagina_combobox.set = "KB - KiloBytes"
+        self.politica_subst_combobox.set = "Relógio"
+
 
         self.combobox_unidade_memoriap = ttk.Combobox(
             mainframe, textvariable=self.unidade_memoriap_combobox,
@@ -94,7 +104,13 @@ class Tela_Configurar(t.Frame):
             mainframe, textvariable=self.unidade_pagina_combobox,
             values=list(MAPA_UNIDADES_UI.keys()), state="readonly", width=15
         )
+
+        self.combobox_politica_subst = ttk.Combobox(
+            mainframe, textvariable=self.politica_subst_combobox,
+            values=["Relógio","LRU"], state="readonly", width=15
+        )
         
+
         # --- Posicionamento dos comboboxes ---
         self.combobox_unidade_memoriap.grid(column=1, row=3, sticky="we", padx=10, pady=2)
         self.combobox_unidade_memorias.grid(column=1, row=6, sticky="we", padx=10, pady=2)
@@ -122,6 +138,7 @@ class Tela_Configurar(t.Frame):
                 "TAMANHO_PAGINA_QUADRO_STR": (self.tam_pagina, self.unidade_pagina_combobox),
                 "TAMANHO_ENDERECO_LOGICO_BITS": self.tam_end_log,
                 "NUMERO_LINHAS_TLB": self.num_lin_tlb,
+                "POLITICA_SUBST" : self.politica_subst_combobox
             }
 
             for var_name, widgets in mapa_config.items():
