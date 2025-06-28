@@ -8,8 +8,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from memoriaPrincipal import MemoriaPrincipal
 from config import (
-    ARQUIVO_TESTE, TAMANHO_MEMORIA_PRINCIPAL_STR, TAMANHO_PAGINA_QUADRO_STR,
-    NUMERO_LINHAS_TLB, POLITICA_SUB, MAPA_UNIDADES
+    ARQ_TESTE, TAM_MEM_PRINCIPAL, TAM_PAGINA_QUADRO,
+    NUM_LINHAS_TLB, POLITICA_SUBST, MAPA_UNIDADES
 )
 from tlb import TLB
 from classesProcessos import Processo
@@ -68,7 +68,7 @@ class Tela_Simular(tk.Frame):
         info_frame = tk.Frame(top_frame, bg='#181f30')
         info_frame.pack(side='right')
         
-        self.label_arquivo = tk.Label(info_frame, text=f"Arquivo: {ARQUIVO_TESTE}", 
+        self.label_arquivo = tk.Label(info_frame, text=f"Arquivo: {ARQ_TESTE}", 
                                     font=('Arial', 10), bg='#181f30', fg='#a0aec0')
         self.label_arquivo.pack(anchor='e')
         
@@ -147,10 +147,10 @@ class Tela_Simular(tk.Frame):
         config_frame = tk.Frame(bottom_frame, bg='#181f30')
         config_frame.pack(pady=(0, 10))
         
-        config_info_text = f"Configurações: Mem. Principal: {TAMANHO_MEMORIA_PRINCIPAL_STR} | "
-        config_info_text += f"Página/Quadro: {TAMANHO_PAGINA_QUADRO_STR} | "
-        config_info_text += f"TLB: {NUMERO_LINHAS_TLB} linhas | "
-        config_info_text += f"Política: {POLITICA_SUB.value}"
+        config_info_text = f"Configurações: Mem. Principal: {TAM_MEM_PRINCIPAL} | "
+        config_info_text += f"Página/Quadro: {TAM_PAGINA_QUADRO} | "
+        config_info_text += f"TLB: {NUM_LINHAS_TLB} linhas | "
+        config_info_text += f"Política: {POLITICA_SUBST}"
         
         config_info = tk.Label(config_frame, text=config_info_text, font=('Arial', 9), bg='#181f30', fg='#a0aec0')
         config_info.pack()
@@ -271,11 +271,11 @@ class Tela_Simular(tk.Frame):
     def carregar_comandos_arquivo(self):
         """Carrega comandos do arquivo de teste configurado"""
         try:
-            with open(ARQUIVO_TESTE, "r", encoding="utf-8") as f: 
+            with open(ARQ_TESTE, "r", encoding="utf-8") as f: 
                 self.comandos = [tuple(line.strip().split()) for line in f if line.strip()]
             return True
         except FileNotFoundError:
-            messagebox.showerror("Erro", f"Arquivo de teste '{ARQUIVO_TESTE}' não encontrado.")
+            messagebox.showerror("Erro", f"Arquivo de teste '{ARQ_TESTE}' não encontrado.")
             return False
         except Exception as e:
             messagebox.showerror("Erro", f"Erro ao ler o arquivo de teste: {e}")

@@ -1,5 +1,5 @@
 import math
-from config import TAMANHO_PAGINA_QUADRO_BYTES, TAMANHO_ENDERECO_LOGICO_BITS, BITS_OFFSET
+from config import TAMANHO_PAGINA_QUADRO, TAMANHO_END_LOGICO, BITS_OFFSET
 from tlb import TLB
 
 # TODO: Definir uma forma de escolher o tamanho da página 
@@ -18,12 +18,12 @@ class Processo:
         self.id = id_processo
         self.tamanho_bytes = tamanho_bytes
         # Calcula quantas páginas são necessárias para o processo
-        self.quantidade_paginas = math.ceil(tamanho_bytes / TAMANHO_PAGINA_QUADRO_BYTES)
+        self.quantidade_paginas = math.ceil(tamanho_bytes / TAMANHO_PAGINA_QUADRO)
         
         # O espaço de endereçamento virtual do processo não pode exceder o limite do sistema
-        max_paginas_sistema = 2**(TAMANHO_ENDERECO_LOGICO_BITS - BITS_OFFSET)
+        max_paginas_sistema = 2**(TAMANHO_END_LOGICO - BITS_OFFSET)
         if self.quantidade_paginas > max_paginas_sistema:
-            raise ValueError(f"Processo P{self.id} é muito grande para o espaço de endereçamento de {TAMANHO_ENDERECO_LOGICO_BITS} bits.")
+            raise ValueError(f"Processo P{self.id} é muito grande para o espaço de endereçamento de {TAMANHO_END_LOGICO} bits.")
             
         # Inicializa a tabela de páginas para este processo
         self.tabela_paginas = TabelaPaginas(self.id, self.quantidade_paginas)
@@ -73,8 +73,8 @@ class TabelaPaginas:
         Primeiro, consulta a TLB. Se falhar (TLB miss), consulta a tabela de páginas.
         Retorna o endereço físico e um booleano indicando se houve page fault.
         """
-        num_pagina = endereco_virtual // TAMANHO_PAGINA_QUADRO_BYTES
-        offset = endereco_virtual % TAMANHO_PAGINA_QUADRO_BYTES
+        num_pagina = endereco_virtual // TAMANHO_PAGINA_QUADRO
+        offset = endereco_virtual % TAMANHO_PAGINA_QUADRO
 
         # 1. Tenta encontrar a tradução na TLB (TLB Hit/Miss)
         resultado_tlb = tlb.consultar(self.id_processo, num_pagina)
@@ -83,7 +83,7 @@ class TabelaPaginas:
             # TLB Hit: Endereço encontrado na TLB
             tlb.hits += 1
             endereco_quadro = resultado_tlb
-            endereco_fisico = endereco_quadro * TAMANHO_PAGINA_QUADRO_BYTES + offset
+            endereco_fisico = endereco_quadro * TAMANHO_PAGINA_QUADRO + offset
             print(f"P{self.id_processo}: TLB HIT! Página {num_pagina} -> Quadro {endereco_quadro}")
             return endereco_fisico, False  # False indica que não houve page fault
         
@@ -104,7 +104,7 @@ class TabelaPaginas:
             endereco_quadro = entrada.endereco_quadro
             # Adiciona a nova tradução à TLB para acessos futuros
             tlb.inserir(self.id_processo, num_pagina, endereco_quadro)
-            endereco_fisico = endereco_quadro * TAMANHO_PAGINA_QUADRO_BYTES + offset
+            endereco_fisico = endereco_quadro * TAMANHO_PAGINA_QUADRO + offset
             return endereco_fisico, False
         else:
             # Page Fault: A página não está na memória principal.

@@ -4,7 +4,6 @@ from PIL import Image, ImageTk
 import re
 
 
-
 class Tela_Configurar(t.Frame):
 
     def __init__(self, parent_frame, controller):
@@ -114,7 +113,7 @@ class Tela_Configurar(t.Frame):
 
         self.combobox_politica_subst = ttk.Combobox(
             mainframe, textvariable=self.politica_subst_combobox,
-            values=["Relógio","LRU"], state="readonly", width=15
+            values=["Relogio","LRU"], state="readonly", width=15
         )
         
 
@@ -154,7 +153,7 @@ class Tela_Configurar(t.Frame):
             activebackground="#696969"
         ).place(x= 500, y= 300)
 
-         def ehPotenciaDeDois(self, n):
+    def ehPotenciaDeDois(self, n):
         try:
             n_int = int(n)
         except ValueError: # Caso a entrada não seja um número inteiro
@@ -169,7 +168,6 @@ class Tela_Configurar(t.Frame):
         valor_tam_mem_fis_str = self.tam_mem_fis_entry.get()
         valor_tam_mem_sec_str = self.tam_mem_sec_entry.get()
         valor_tam_pagina_str = self.tam_pagina_entry.get()
-        valor_tam_quadro_str = self.tam_quad_mem_entry.get()
         valor_tam_end_log_str = self.tam_end_log_entry.get()
         valor_num_lin_tlb_str = self.num_lin_tlb_entry.get()
 
@@ -194,7 +192,6 @@ class Tela_Configurar(t.Frame):
         valores_numericos['TAMANHO_PAGINA'] = get_and_validate_int("Tamanho da Página do Processo", valor_tam_pagina_str)
         valores_numericos['TAMANHO_MEMORIA_P'] = get_and_validate_int("Tamanho da Memória Física", valor_tam_mem_fis_str)
         valores_numericos['TAMANHO_MEMORIA_S'] = get_and_validate_int("Tamanho da Memória Secundária", valor_tam_mem_sec_str)
-        valores_numericos['TAM_QUADRO'] = get_and_validate_int("Tamanho do Quadro de Memória", valor_tam_quadro_str)
         valores_numericos['TAM_END_LOGICO'] = get_and_validate_int("Tamanho do Endereço Lógico", valor_tam_end_log_str)
 
         # Se algum campo não passou na validação inicial (tipo ou vazio), get_and_validate_int já mostrou erro
@@ -214,9 +211,18 @@ class Tela_Configurar(t.Frame):
             return
 
         # TAMANHO_MEMORIA_P (Memória Física)
+        inf_mep = (self.combobox_unidade_memoriap.get())
+        info_memp = inf_mep[0:2]
+        inf_pag = self.combobox_unidade_pagina.get()
+        info_pag = inf_pag[0:2]
+
+        ordem = ["KB", "MB", "GB"]
+
+        # TAMANHO_MEMORIA_P (Memória Física)
         if valores_numericos['TAMANHO_MEMORIA_P'] <= 0 or \
            valores_numericos['TAMANHO_MEMORIA_P'] < valores_numericos['TAMANHO_PAGINA'] or \
-           not self.ehPotenciaDeDois(valores_numericos['TAMANHO_MEMORIA_P']):
+           not self.ehPotenciaDeDois(valores_numericos['TAMANHO_MEMORIA_P']) or \
+           ((valores_numericos['TAMANHO_MEMORIA_P'] >= valores_numericos['TAMANHO_PAGINA']) and (ordem.index(info_memp) < ordem.index(info_pag) )):
             messagebox.showerror("Erro de Validação", "ERRO: Tamanho da Memória Física deve ser maior que zero, maior ou igual ao Tamanho da Página do Processo e potência de 2.")
             return
             
@@ -226,16 +232,10 @@ class Tela_Configurar(t.Frame):
             messagebox.showerror("Erro de Validação", "ERRO: Tamanho da Memória Secundária deve ser maior que zero e potência de 2.")
             return
 
-        # TAM_QUADRO
-        if valores_numericos['TAM_QUADRO'] <= 0 or not self.ehPotenciaDeDois(valores_numericos['TAM_QUADRO']):
-            messagebox.showerror("Erro de Validação", "ERRO: Tamanho do Quadro de Memória deve ser maior que zero e potência de 2.")
-            return
-        
         # TAM_END_LOGICO
         if valores_numericos['TAM_END_LOGICO'] <= 0 or not self.ehPotenciaDeDois(valores_numericos['TAM_END_LOGICO']):
-            messagebox.showerror("Erro de Validação", "ERRO: Tamanho do Endereço Lógico deve ser maior que zero e potência de 2.")
+            messagebox.showerror("Erro de Validação", "ERRO: Tamanho do Endereço Lógico deve ser maior que zero, potência de 2 e maior que os bits de offset")
             return
-
 
         # Se todas as validações passarem, prossegue com a coleta e salvamento das informações
         self.pegar_info()
@@ -249,17 +249,13 @@ class Tela_Configurar(t.Frame):
         info_tam_memp = self.tam_mem_fis_entry.get()
         info_tam_mems = self.tam_mem_sec_entry.get()
         info_tam_pag = self.tam_pagina_entry.get()
-        info_tam_quadro = self.tam_quad_mem_entry.get()
         info_tam_endlog = self.tam_end_log_entry.get()
         info_num_lin_tlb = self.num_lin_tlb_entry.get()
 
         info_unidade_memp = self.combobox_unidade_memoriap.get()
         info_unidade_mems = self.combobox_unidade_memorias.get()
         info_unidade_pag = self.combobox_unidade_pagina.get()
-        info_unidade_quadro = self.combobox_unidade_quadro.get()
-        info_unidade_endlog = self.combobox_unidade_endlog.get()
         info_politica_subst = self.combobox_politica_subst.get()
-
 
         try:
             with open("config.py", "r") as arquivo:
@@ -272,16 +268,13 @@ class Tela_Configurar(t.Frame):
         novas_configs = {
             "TAM_MEM_PRINCIPAL": info_tam_memp,
             "TAM_MEM_SECUNDARIA": info_tam_mems,
-            "TAM_PAGINA": info_tam_pag,
-            "TAM_QUADRO": info_tam_quadro,
+            "TAM_PAGINA_QUADRO": info_tam_pag,
             "TAM_END_LOGICO": info_tam_endlog,
             "NUM_LINHAS_TLB": info_num_lin_tlb,
             "POLITICA_SUBST": info_politica_subst,
             "UNID_MEMP" : info_unidade_memp,
             "UNID_MEMS" : info_unidade_mems,
-            "UNID_PAG" : info_unidade_pag,
-            "UNID_QUAD" : info_unidade_quadro,
-            "UNID_ENDLOG" : info_unidade_endlog,
+            "UNID_PAG_QUAD" : info_unidade_pag,
         }
 
         novas_linhas_conteudo = []

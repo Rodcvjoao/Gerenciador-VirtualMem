@@ -3,8 +3,8 @@ from memoriaPrincipal import MemoriaPrincipal
 from tlb import TLB
 from classesProcessos import Processo
 from config import (
-    ARQUIVO_TESTE, TAMANHO_MEMORIA_PRINCIPAL_STR, TAMANHO_PAGINA_QUADRO_STR,
-    NUMERO_LINHAS_TLB, POLITICA_SUB, MAPA_UNIDADES, TAMANHO_PAGINA_QUADRO_BYTES
+    ARQ_TESTE, TAM_MEM_PRINCIPAL, TAM_PAGINA_QUADRO,
+    NUM_LINHAS_TLB, POLITICA_SUBST, MAPA_UNIDADES, TAMANHO_PAGINA_QUADRO
 )
 
 def tratar_acesso_memoria(processo: Processo, endereco_virtual: int, tlb: TLB, mp: MemoriaPrincipal, tipo_acesso: str, processos_lista: list[Processo]):
@@ -17,12 +17,12 @@ def tratar_acesso_memoria(processo: Processo, endereco_virtual: int, tlb: TLB, m
 
     # Verifica se o endereço virtual está dentro dos limites do processo.
     if endereco_virtual >= processo.tamanho_bytes:
-        print(f"!!! ERRO DE SEGMENTAÇÃO !!!: Endereço {endereco_virtual} (página {endereco_virtual // TAMANHO_PAGINA_QUADRO_BYTES}) "
+        print(f"!!! ERRO DE SEGMENTAÇÃO !!!: Endereço {endereco_virtual} (página {endereco_virtual // TAMANHO_PAGINA_QUADRO}) "
               f"está fora do espaço de endereçamento do P{processo.id} (tamanho: {processo.tamanho_bytes} bytes).")
         processo.estado = "Finalizado (Erro)"
         return
 
-    num_pagina_virtual = endereco_virtual // TAMANHO_PAGINA_QUADRO_BYTES
+    num_pagina_virtual = endereco_virtual // TAMANHO_PAGINA_QUADRO
     
     # Tenta traduzir o endereço, consultando a TLB e depois a Tabela de Páginas.
     endereco_fisico, page_fault = processo.tabela_paginas.traduzir_endereco(endereco_virtual, tlb)
@@ -131,10 +131,10 @@ def executar_simulacao(caminho_arquivo: str):
     print("INICIANDO SIMULADOR DE MEMÓRIA VIRTUAL")
     print("="*50)
     print(f"  - Arquivo de Comandos: {caminho_arquivo}")
-    print(f"  - Memória Principal: {TAMANHO_MEMORIA_PRINCIPAL_STR}")
-    print(f"  - Tamanho da Página/Quadro: {TAMANHO_PAGINA_QUADRO_STR}")
-    print(f"  - Entradas na TLB: {NUMERO_LINHAS_TLB}")
-    print(f"  - Política de Substituição: {POLITICA_SUB.value}")
+    print(f"  - Memória Principal: {TAM_MEM_PRINCIPAL}")
+    print(f"  - Tamanho da Página/Quadro: {TAM_PAGINA_QUADRO}")
+    print(f"  - Entradas na TLB: {NUM_LINHAS_TLB}")
+    print(f"  - Política de Substituição: {POLITICA_SUBST}")
     print("="*50 + "\n")
 
     for comando in comandos:
@@ -188,4 +188,4 @@ def executar_simulacao(caminho_arquivo: str):
 
 # --- Ponto de Entrada Principal ---
 if __name__ == "__main__":
-    executar_simulacao(ARQUIVO_TESTE)
+    executar_simulacao(ARQ_TESTE)

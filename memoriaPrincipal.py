@@ -1,5 +1,5 @@
 import collections
-from config import NUM_QUADROS_MEMORIA_PRINCIPAL, POLITICA_SUB, PoliticaSubstituicao
+from config import NUM_QUADROS_MEMORIA_PRINCIPAL, POLITICA_SUBST, PoliticaSubstituicao
 from classesProcessos import Processo, Pagina
 
 '''
@@ -83,10 +83,10 @@ class MemoriaPrincipal:
         """
         Seleciona um quadro para ser substituído com base na política configurada.
         """
-        print(f"Memória cheia! Acionando política de substituição: {POLITICA_SUB.value}")
-        if POLITICA_SUB == PoliticaSubstituicao.LRU:
+        print(f"Memória cheia! Acionando política de substituição: {POLITICA_SUBST}")
+        if POLITICA_SUBST == PoliticaSubstituicao.LRU:
             return self._substituicao_lru()
-        elif POLITICA_SUB == PoliticaSubstituicao.RELOGIO:
+        elif POLITICA_SUBST == PoliticaSubstituicao.RELOGIO:
             return self._substituicao_relogio()
         else:
             # Fallback - não deve acontecer com a validação em config.py
