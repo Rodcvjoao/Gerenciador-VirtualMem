@@ -3,13 +3,7 @@ from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 import re
 
-# Mapeamento de nomes de unidade da UI para os do config.py
-MAPA_UNIDADES_UI = {
-    "KB - KiloBytes": "KB",
-    "MB - MegaBytes": "MB",
-    "GB - GigaBytes": "GB"
-}
-REVERSE_MAPA_UNIDADES_UI = {v: k for k, v in MAPA_UNIDADES_UI.items()}
+
 
 class Tela_Configurar(t.Frame):
 
@@ -86,23 +80,36 @@ class Tela_Configurar(t.Frame):
         self.unidade_pagina_combobox = t.StringVar()
         self.politica_subst_combobox = t.StringVar()
 
-        self.unidade_memoriap_combobox.set = "KB - KiloBytes"
-        self.unidade_memorias_combobox.set = "KB - KiloBytes"
-        self.unidade_pagina_combobox.set = "KB - KiloBytes"
-        self.politica_subst_combobox.set = "Relógio"
+        self.unidade_memoriap_combobox.set("KB - KiloBytes")
+        self.unidade_memorias_combobox.set("KB - KiloBytes")
+        self.unidade_pagina_combobox.set("KB - KiloBytes")
+        self.politica_subst_combobox.set("Relógio")
 
+
+        t.Label(mainframe, bg='#FFFFFF').grid(column=1, row=0, sticky=t.W, padx=10, pady=5)
 
         self.combobox_unidade_memoriap = ttk.Combobox(
-            mainframe, textvariable=self.unidade_memoriap_combobox,
-            values=list(MAPA_UNIDADES_UI.keys()), state="readonly", width=15
+            mainframe,
+            textvariable=self.unidade_memoriap_combobox,
+            values=["KB - KiloBytes", "MB - MegaBytes", "GB - GigaBytes"],
+            state="readonly",
+            width=15
         )
+
         self.combobox_unidade_memorias = ttk.Combobox(
-            mainframe, textvariable=self.unidade_memorias_combobox,
-            values=list(MAPA_UNIDADES_UI.keys()), state="readonly", width=15
+            mainframe,
+            textvariable=self.unidade_memorias_combobox,
+            values=["KB - KiloBytes", "MB - MegaBytes", "GB - GigaBytes"],
+            state="readonly",
+            width=15
         )
+
         self.combobox_unidade_pagina = ttk.Combobox(
-            mainframe, textvariable=self.unidade_pagina_combobox,
-            values=list(MAPA_UNIDADES_UI.keys()), state="readonly", width=15
+            mainframe,
+            textvariable=self.unidade_pagina_combobox,
+            values=["KB - KiloBytes", "MB - MegaBytes", "GB - GigaBytes"],
+            state="readonly",
+            width=15
         )
 
         self.combobox_politica_subst = ttk.Combobox(
@@ -115,123 +122,191 @@ class Tela_Configurar(t.Frame):
         self.combobox_unidade_memoriap.grid(column=1, row=3, sticky="we", padx=10, pady=2)
         self.combobox_unidade_memorias.grid(column=1, row=6, sticky="we", padx=10, pady=2)
         self.combobox_unidade_pagina.grid(column=1, row=9, sticky="we", padx=10, pady=2)
+        self.combobox_politica_subst.grid(column=3, row=8, sticky="we", padx=10, pady=2)
         
+
+        for child in mainframe.winfo_children():
+            child.grid_configure(padx=10, pady=6)
+
+
         # --- Botões ---
-        t.Button(self, text="Voltar", command=lambda: controller.show_page("ui_pagina_inicial.py")).place(x=500, y=230)
-        t.Button(self, text="Salvar", command=self.salvar_e_fechar).place(x=500, y=300)
+        t.Button(
+            self,
+            text="Voltar",
+            height=2,
+            width=15,
+            fg="white",
+            bg="#0C0E8B",
+            font=("monospace", 10, "bold"),
+            activebackground= "#393CD1",
+            command=lambda: self.controller.show_page("ui_pagina_inicial.py")
+        ).place(x= 500, y= 230)
 
-        # Carrega as configurações atuais ao iniciar a tela
-        self.carregar_configuracoes_atuais()
+        t.Button(
+            self,
+            text="Enviar",
+            height=2,
+            width=15,
+            fg="white",
+            bg="#1ECC6F",
+            font=("monospace", 10, "bold"),
+            command=self.salvar_configuracoes,
+            activebackground="#696969"
+        ).place(x= 500, y= 300)
 
-    def carregar_configuracoes_atuais(self):
-        """
-        Lê o arquivo config.py e preenche os campos da UI com os valores atuais.
-        """
+         def ehPotenciaDeDois(self, n):
         try:
-            with open("config.py", "r") as f:
-                content = f.read()
+            n_int = int(n)
+        except ValueError: # Caso a entrada não seja um número inteiro
+            return False
+        if n_int <= 0:
+            return False
+        return (n_int & (n_int - 1)) == 0
 
-            # Dicionário com as variáveis que queremos extrair e os widgets correspondentes
-            mapa_config = {
-                "TAMANHO_MEMORIA_PRINCIPAL_STR": (self.tam_mem_fis, self.unidade_memoriap_combobox),
-                "TAMANHO_MEMORIA_SECUNDARIA_STR": (self.tam_mem_sec, self.unidade_memorias_combobox),
-                "TAMANHO_PAGINA_QUADRO_STR": (self.tam_pagina, self.unidade_pagina_combobox),
-                "TAMANHO_ENDERECO_LOGICO_BITS": self.tam_end_log,
-                "NUMERO_LINHAS_TLB": self.num_lin_tlb,
-                "POLITICA_SUBST" : self.politica_subst_combobox
-            }
+    def salvar_configuracoes(self):
+        # Mapeamento das entradas e seus nomes para mensagens de erro
+        # Primeiro, obtenha todos os valores para poder fazer validações cruzadas
+        valor_tam_mem_fis_str = self.tam_mem_fis_entry.get()
+        valor_tam_mem_sec_str = self.tam_mem_sec_entry.get()
+        valor_tam_pagina_str = self.tam_pagina_entry.get()
+        valor_tam_quadro_str = self.tam_quad_mem_entry.get()
+        valor_tam_end_log_str = self.tam_end_log_entry.get()
+        valor_num_lin_tlb_str = self.num_lin_tlb_entry.get()
 
-            for var_name, widgets in mapa_config.items():
-                # Escolher o regex com base no tipo de widget esperado
-                if isinstance(widgets, tuple):
-                    # Para valores de string com unidade, ex: "64 KB"
-                    regex = rf'^{var_name}\s*=\s*"([^"]+)"'
-                else:
-                    # Para valores numéricos simples, ex: 4
-                    regex = rf'^{var_name}\s*=\s*(\d+)'
-                
-                match = re.search(regex, content, re.MULTILINE)
-                if match:
-                    valor = match.group(1).strip()
-                    if isinstance(widgets, tuple):
-                        # É uma configuração de tamanho com unidade (ex: "64 KB")
-                        partes = valor.split()
-                        if len(partes) == 2:
-                            widgets[0].set(partes[0]) # Valor numérico
-                            # Converte a unidade (KB) para a string da UI (KB - KiloBytes)
-                            widgets[1].set(REVERSE_MAPA_UNIDADES_UI.get(partes[1].upper(), "KB - KiloBytes"))
-                    else:
-                        # É uma configuração numérica simples
-                        widgets.set(valor)
-        except FileNotFoundError:
-            messagebox.showerror("Erro", "Arquivo de configuração 'config.py' não encontrado.")
-        except Exception as e:
-            messagebox.showerror("Erro", f"Falha ao carregar configurações: {e}")
+        # Dicionário para armazenar os valores convertidos para uso nas validações
+        # e evitar múltiplas conversões ou erros por tipo
+        valores_numericos = {}
 
-    def salvar_e_fechar(self):
-        """
-        Valida os campos, salva as configurações e volta para a tela de input.
-        """
-        # --- Validação Simples na UI ---
-        campos_para_validar = {
-            "Tamanho da Memória Física": self.tam_mem_fis.get(),
-            "Tamanho da Memória Secundária": self.tam_mem_sec.get(),
-            "Tamanho da Página": self.tam_pagina.get(),
-            "Endereço Lógico (bits)": self.tam_end_log.get(),
-            "Linhas da TLB": self.num_lin_tlb.get()
-        }
-        for nome, valor in campos_para_validar.items():
-            if not valor:
-                messagebox.showerror("Erro de Validação", f"O campo '{nome}' não pode estar vazio.")
-                return
+        # Função auxiliar para validar e converter para int
+        def get_and_validate_int(campo_nome, valor_str):
+            if not valor_str:
+                messagebox.showerror("Erro de Validação", f"O campo '{campo_nome}' não pode estar vazio.")
+                return None
             try:
-                int(valor)
+                valor = int(valor_str)
+                return valor
             except ValueError:
-                messagebox.showerror("Erro de Validação", f"O campo '{nome}' deve conter um número inteiro.")
-                return
+                messagebox.showerror("Erro de Validação", f"O valor para '{campo_nome}' deve ser um número inteiro.")
+                return None
 
-        # Se a validação básica passar, tenta salvar.
-        self.escrever_configuracoes()
-        messagebox.showinfo("Sucesso", "Configurações salvas! O programa usará estas configurações na próxima simulação.")
+        # Validação inicial de tipo e vazio para todos os campos numéricos
+        valores_numericos['NUM_LINHAS_TLB'] = get_and_validate_int("Número de Linhas da TLB", valor_num_lin_tlb_str)
+        valores_numericos['TAMANHO_PAGINA'] = get_and_validate_int("Tamanho da Página do Processo", valor_tam_pagina_str)
+        valores_numericos['TAMANHO_MEMORIA_P'] = get_and_validate_int("Tamanho da Memória Física", valor_tam_mem_fis_str)
+        valores_numericos['TAMANHO_MEMORIA_S'] = get_and_validate_int("Tamanho da Memória Secundária", valor_tam_mem_sec_str)
+        valores_numericos['TAM_QUADRO'] = get_and_validate_int("Tamanho do Quadro de Memória", valor_tam_quadro_str)
+        valores_numericos['TAM_END_LOGICO'] = get_and_validate_int("Tamanho do Endereço Lógico", valor_tam_end_log_str)
+
+        # Se algum campo não passou na validação inicial (tipo ou vazio), get_and_validate_int já mostrou erro
+        # e retornou None, então podemos parar aqui.
+        if any(v is None for v in valores_numericos.values()):
+            return
+
+        # Aplicação das regras de validação específicas (agora com valores numéricos)
+        # NUMERO_LINHAS_TLB
+        if valores_numericos['NUM_LINHAS_TLB'] <= 0:
+            messagebox.showerror("Erro de Validação", "ERRO: Número de Linhas da TLB deve ser maior que zero.")
+            return
+
+        # TAMANHO_PAGINA
+        if valores_numericos['TAMANHO_PAGINA'] <= 0 or not self.ehPotenciaDeDois(valores_numericos['TAMANHO_PAGINA']):
+            messagebox.showerror("Erro de Validação", "ERRO: Tamanho da Página do Processo deve ser maior que zero e potência de 2.")
+            return
+
+        # TAMANHO_MEMORIA_P (Memória Física)
+        if valores_numericos['TAMANHO_MEMORIA_P'] <= 0 or \
+           valores_numericos['TAMANHO_MEMORIA_P'] < valores_numericos['TAMANHO_PAGINA'] or \
+           not self.ehPotenciaDeDois(valores_numericos['TAMANHO_MEMORIA_P']):
+            messagebox.showerror("Erro de Validação", "ERRO: Tamanho da Memória Física deve ser maior que zero, maior ou igual ao Tamanho da Página do Processo e potência de 2.")
+            return
+            
+        # Adicionando validação para os outros campos 
+        # TAM_MEM_SECUNDARIA
+        if valores_numericos['TAMANHO_MEMORIA_S'] <= 0 or not self.ehPotenciaDeDois(valores_numericos['TAMANHO_MEMORIA_S']):
+            messagebox.showerror("Erro de Validação", "ERRO: Tamanho da Memória Secundária deve ser maior que zero e potência de 2.")
+            return
+
+        # TAM_QUADRO
+        if valores_numericos['TAM_QUADRO'] <= 0 or not self.ehPotenciaDeDois(valores_numericos['TAM_QUADRO']):
+            messagebox.showerror("Erro de Validação", "ERRO: Tamanho do Quadro de Memória deve ser maior que zero e potência de 2.")
+            return
+        
+        # TAM_END_LOGICO
+        if valores_numericos['TAM_END_LOGICO'] <= 0 or not self.ehPotenciaDeDois(valores_numericos['TAM_END_LOGICO']):
+            messagebox.showerror("Erro de Validação", "ERRO: Tamanho do Endereço Lógico deve ser maior que zero e potência de 2.")
+            return
+
+
+        # Se todas as validações passarem, prossegue com a coleta e salvamento das informações
+        self.pegar_info()
+        messagebox.showinfo("Sucesso", "Configurações salvas com sucesso!")
         self.controller.show_page("ui_pagina_input.py")
 
-    def escrever_configuracoes(self):
-        """
-        Pega as informações da UI e as escreve no arquivo config.py no formato correto.
-        """
-        # Constrói as strings de configuração no formato "VALOR UNIDADE"
-        config_str_memp = f'"{self.tam_mem_fis.get()} {MAPA_UNIDADES_UI[self.unidade_memoriap_combobox.get()]}"'
-        config_str_mems = f'"{self.tam_mem_sec.get()} {MAPA_UNIDADES_UI[self.unidade_memorias_combobox.get()]}"'
-        config_str_pag = f'"{self.tam_pagina.get()} {MAPA_UNIDADES_UI[self.unidade_pagina_combobox.get()]}"'
 
-        # Monta o dicionário de configurações com os nomes de variáveis do config.py
-        novas_configs = {
-            "TAMANHO_MEMORIA_PRINCIPAL_STR": config_str_memp,
-            "TAMANHO_MEMORIA_SECUNDARIA_STR": config_str_mems,
-            "TAMANHO_PAGINA_QUADRO_STR": config_str_pag,
-            "TAMANHO_ENDERECO_LOGICO_BITS": self.tam_end_log.get(),
-            "NUMERO_LINHAS_TLB": self.num_lin_tlb.get(),
-        }
+    # Leva as informações da interface para config
+    def pegar_info(self):
+        # Coleta os valores (já validados como strings, mas que representam números)
+        info_tam_memp = self.tam_mem_fis_entry.get()
+        info_tam_mems = self.tam_mem_sec_entry.get()
+        info_tam_pag = self.tam_pagina_entry.get()
+        info_tam_quadro = self.tam_quad_mem_entry.get()
+        info_tam_endlog = self.tam_end_log_entry.get()
+        info_num_lin_tlb = self.num_lin_tlb_entry.get()
+
+        info_unidade_memp = self.combobox_unidade_memoriap.get()
+        info_unidade_mems = self.combobox_unidade_memorias.get()
+        info_unidade_pag = self.combobox_unidade_pagina.get()
+        info_unidade_quadro = self.combobox_unidade_quadro.get()
+        info_unidade_endlog = self.combobox_unidade_endlog.get()
+        info_politica_subst = self.combobox_politica_subst.get()
+
 
         try:
-            with open("config.py", "r") as f:
-                linhas = f.readlines()
+            with open("config.py", "r") as arquivo:
+                linhas = arquivo.readlines()
+        except FileNotFoundError:
+            print("Aviso: O arquivo 'config.py' não foi encontrado. Criando um novo.")
+            linhas = []
 
-            novas_linhas = []
-            for linha in linhas:
-                # Usa uma flag para ver se a linha foi substituída
-                substituido = False
-                for chave, valor in novas_configs.items():
-                    if linha.strip().startswith(chave):
-                        novas_linhas.append(f"{chave} = {valor}\n")
-                        substituido = True
-                        break
-                if not substituido:
-                    novas_linhas.append(linha)
-            
-            with open("config.py", "w") as f:
-                f.writelines(novas_linhas)
-            print("Arquivo config.py atualizado com sucesso pela UI.")
 
-        except Exception as e:
-            messagebox.showerror("Erro de Escrita", f"Não foi possível salvar as configurações: {e}")
+        novas_configs = {
+            "TAM_MEM_PRINCIPAL": info_tam_memp,
+            "TAM_MEM_SECUNDARIA": info_tam_mems,
+            "TAM_PAGINA": info_tam_pag,
+            "TAM_QUADRO": info_tam_quadro,
+            "TAM_END_LOGICO": info_tam_endlog,
+            "NUM_LINHAS_TLB": info_num_lin_tlb,
+            "POLITICA_SUBST": info_politica_subst,
+            "UNID_MEMP" : info_unidade_memp,
+            "UNID_MEMS" : info_unidade_mems,
+            "UNID_PAG" : info_unidade_pag,
+            "UNID_QUAD" : info_unidade_quadro,
+            "UNID_ENDLOG" : info_unidade_endlog,
+        }
+
+        novas_linhas_conteudo = []
+        chaves_encontradas = set()
+
+        for linha in linhas:
+            atualizado = False
+            for chave, valor in novas_configs.items():
+                padrao = re.compile(rf"^{chave}\s*=")
+                if padrao.match(linha):
+                    novas_linhas_conteudo.append(f"{chave} = \"{valor}\"\n")
+                    atualizado = True
+                    chaves_encontradas.add(chave)
+                    break
+            if not atualizado:
+                novas_linhas_conteudo.append(linha)
+
+        for chave, valor in novas_configs.items():
+            if chave not in chaves_encontradas:
+                novas_linhas_conteudo.append(f"{chave} = \"{valor}\"\n")
+
+        try:
+            with open("config.py","w") as arquivo:
+                arquivo.writelines(novas_linhas_conteudo)
+            print("Configuração salva/atualizada em: config.py")
+        except IOError as e:
+            print(f"Erro ao escrever no arquivo 'config.py': {e}")
+            messagebox.showerror("Erro de Escrita", f"Não foi possível salvar as configurações no arquivo 'config.py': {e}")
