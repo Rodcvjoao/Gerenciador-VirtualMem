@@ -51,7 +51,7 @@ class Tela_Simular(tk.Frame):
         header_frame.pack_propagate(False)
         
         # Título e controles na mesma linha
-        tk.Label(header_frame, text="Simulador de Memória", 
+        tk.Label(header_frame, text="Simulador de Memória Virtual", 
                 font=('Arial', 14, 'bold'), bg='#181f30', fg='white').pack(side='left', pady=5)
         
         # Controles à direita
