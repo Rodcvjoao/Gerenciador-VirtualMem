@@ -67,8 +67,11 @@ def tratar_acesso_memoria(processo: Processo, endereco_virtual: int, tlb: TLB, m
         entrada_atual = processo.tabela_paginas.entradas[num_pagina_virtual]
         entrada_atual.bit_presenca = True
         entrada_atual.endereco_quadro = quadro_alocado.id_quadro
-        
         print(f"P{processo.id}: Página {pagina_necessaria.id_pagina} carregada no quadro {quadro_alocado.id_quadro}.")
+
+        # Como a página foi trazida para a memória, sua tradução é inserida na TLB.
+        tlb.inserir(processo.id, num_pagina_virtual, quadro_alocado.id_quadro)
+        
         processo.estado = "Pronto"
 
     if tipo_acesso == "W":
