@@ -1,52 +1,64 @@
 from enum import Enum
+import math
 
-# Configurações do sistema de memória virtual
-# Estas configurações podem ser modificadas diretamente neste arquivo
+class PoliticaSubstituicao(Enum):
+    LRU = "LRU"
+    RELOGIO = "RELOGIO"
 
-# Tamanho da TLB (número de entradas)
-TAMANHO_TLB = 16
+# Vinda das informações da interface
+TAM_MEM_PRINCIPAL = "32"
+TAM_MEM_SECUNDARIA = "32"
+TAM_PAGINA_QUADRO = "16"
+TAM_END_LOGICO = "16"
+NUM_LINHAS_TLB = "6"
+POLITICA_SUBST = "LRU"
 
-# Tamanho da página em bytes (1MB)
-TAMANHO_PAGINA = 2**20
+try:
+    POLITICA_SUBST = PoliticaSubstituicao[POLITICA_SUBST.upper()]
+except KeyError:
+    print(f"Alerta: Política '{POLITICA_SUBST}' inválida. Usando RELOGIO como padrão.")
+    POLITICA_SUBST = PoliticaSubstituicao.RELOGIO
 
-# Tamanho total da memória física (1GB)
-TAMANHO_MEMORIA = 2**30
+# Tratamento das strings para inteiros
+TAMANHO_MEMORIA_P = int(TAM_MEM_PRINCIPAL)
+TAMANHO_MEMORIA_S = int(TAM_MEM_SECUNDARIA)
+TAMANHO_PAGINA_QUADRO = int(TAM_PAGINA_QUADRO)
+TAMANHO_END_LOGICO = int(TAM_END_LOGICO)
+NUMERO_LINHAS_TLB = int(NUM_LINHAS_TLB)
 
-# Define a política a ser usada na substituição de quadros na MP
-# POLITICA_SUB = 0 -> LRU
-# POLITICA_SUB = 1 -> RELÓGIO DE UM BIT
-POLITICA_SUB = 0
+# Unidades vindas da interface
+UNID_MEMP = "KB - KiloBytes"
+UNID_MEMS = "GB - GigaBytes"
+UNID_PAG_QUAD = "KB - KiloBytes"
 
-class PoliticaSub(Enum):
-    LRU = 0
-    Relogio = 1
 
-# Função para verificar se um número é potência de 2
-def ehPotenciaDeDois(n):
-    if n <= 0:
-        return False
-    return (n & (n - 1)) == 0
+lista_unidade = [UNID_MEMP, UNID_MEMS, UNID_PAG_QUAD]
 
-# Função para validar as configurações
-def validarConfiguracoes():
-    """
-    Valida se as configurações estão em valores razoáveis.
-    Retorna True se tudo estiver ok, False caso contrário.
-    """
-    if TAMANHO_TLB <= 0:
-        print("ERRO: TAMANHO_TLB deve ser maior que zero")
-        return False
-    
-    if TAMANHO_PAGINA <= 0 or not ehPotenciaDeDois(TAMANHO_PAGINA):  #Potência de 2
-        print("ERRO: TAMANHO_PAGINA deve ser maior que zero e potencia de 2.")
-        return False
-    
-    if TAMANHO_MEMORIA <= 0 or TAMANHO_MEMORIA < TAMANHO_PAGINA or not ehPotenciaDeDois(TAMANHO_MEMORIA):
-        print("ERRO: TAMANHO_MEMORIA deve ser maior que zero, maior que TAMANHO_PAGINA e potência de 2.")
-        return False
-    
-    return True
+# Tratamento das unidades em strings para inteiros
+for i in range(len(lista_unidade)):
+    if (lista_unidade[i] == "KB - KiloBytes"):
+        lista_unidade[i] = 2 ** 10
+    elif (lista_unidade[i] == "MB - MegaBytes"):
+        lista_unidade[i] = 2 ** 20
+    else:
+        lista_unidade[i] = 2 ** 30
 
-# Valida as configurações ao importar o módulo
-if not validarConfiguracoes():
-    raise ValueError("Configurações inválidas. Verifique o arquivo config.py") 
+UNID_MEMP, UNID_MEMS, UNID_PAG_QUAD = lista_unidade
+
+TAMANHO_MEMORIA_P *= UNID_MEMP
+TAMANHO_MEMORIA_S *= UNID_MEMS
+TAMANHO_PAGINA_QUADRO *= UNID_PAG_QUAD
+
+# Pegando o nome do arquivo teste
+ARQ_TESTE = "caso_teste.txt"
+
+MAPA_UNIDADES = {
+    "B": 1,
+    "KB": 2**10,
+    "MB": 2**20,
+    "GB": 2**30
+}
+
+
+BITS_OFFSET = (int(math.log2(TAMANHO_PAGINA_QUADRO)))
+NUM_QUADROS_MEMORIA_PRINCIPAL = TAMANHO_MEMORIA_P // TAMANHO_PAGINA_QUADRO

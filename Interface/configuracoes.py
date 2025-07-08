@@ -1,6 +1,4 @@
-# page_manager.py
 import tkinter as tk
-from tkinter import ttk
 
 class PageManager(tk.Frame):
     """
